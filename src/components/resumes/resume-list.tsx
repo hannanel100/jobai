@@ -120,94 +120,44 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
                 )}
               </div>
             </div>
-          </CardHeader>          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <FileText className="h-4 w-4" />
-                    {resume.fileName || "Unknown file"}
-                  </div>
-                  <div>{formatFileSize(resume.fileSize)}</div>
-                  {resume.fileType && (
-                    <div className="text-xs px-2 py-1 bg-gray-100 rounded">
-                      {resume.fileType.includes("pdf") ? "PDF" : "DOCX"}
-                    </div>
-                  )}
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
+                  <FileText className="h-4 w-4" />
+                  {resume.fileName || "Unknown file"}
                 </div>
-              </div>
-
-              {/* Application Analytics */}
-              <div className="border-t pt-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1 text-blue-600">
-                      <Users className="h-4 w-4" />
-                      <span className="font-medium">{resume._count.applications}</span>
-                      <span className="text-gray-600">applications</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {resume.fileUrl && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownload(resume.fileUrl!, resume.fileName || "resume")}
-                        className="flex items-center gap-1"
-                      >
-                        <Download className="h-4 w-4" />
-                        Download
-                      </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(resume.id)}
-                      disabled={deletingId === resume.id}
-                      className="flex items-center gap-1 text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      {deletingId === resume.id ? "Deleting..." : "Delete"}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Recent Applications */}
-                {resume.applications.length > 0 && (
-                  <div className="mt-3 pt-3 border-t">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Recent Applications:</h4>
-                    <div className="space-y-1">
-                      {resume.applications.map((app) => (
-                        <div key={app.id} className="flex items-center justify-between text-xs text-gray-600">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-3 w-3" />
-                            <span className="font-medium">{app.companyName}</span>
-                            <span>•</span>
-                            <span>{app.positionTitle}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${
-                                app.status === 'APPLIED' ? 'text-blue-600 border-blue-300' :
-                                app.status === 'INTERVIEWING' ? 'text-orange-600 border-orange-300' :
-                                app.status === 'OFFERED' ? 'text-green-600 border-green-300' :
-                                app.status === 'REJECTED' ? 'text-red-600 border-red-300' :
-                                'text-gray-600 border-gray-300'
-                              }`}
-                            >
-                              {app.status.toLowerCase()}
-                            </Badge>
-                            <span className="text-gray-400">
-                              {formatDate(app.createdAt)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                <div>{formatFileSize(resume.fileSize)}</div>
+                {resume.fileType && (
+                  <div className="text-xs px-2 py-1 bg-gray-100 rounded">
+                    {resume.fileType.includes("pdf") ? "PDF" : "DOCX"}
                   </div>
                 )}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {resume.fileUrl && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownload(resume.fileUrl!, resume.fileName || "resume")}
+                    className="flex items-center gap-1"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDelete(resume.id)}
+                  disabled={deletingId === resume.id}
+                  className="flex items-center gap-1 text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {deletingId === resume.id ? "Deleting..." : "Delete"}
+                </Button>
               </div>
             </div>
           </CardContent>

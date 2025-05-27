@@ -7,8 +7,21 @@ import { ResumeList } from '@/components/resumes/resume-list'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Resume } from '@prisma/client'
 
+type ResumeWithRelations = Resume & {
+  _count: {
+    applications: number;
+  };
+  applications: Array<{
+    id: string;
+    companyName: string;
+    positionTitle: string;
+    status: string;
+    createdAt: Date;
+  }>;
+}
+
 interface ResumesClientProps {
-  resumes: Resume[]
+  resumes: ResumeWithRelations[]
 }
 
 export function ResumesClient({ resumes }: ResumesClientProps) {
@@ -24,8 +37,8 @@ export function ResumesClient({ resumes }: ResumesClientProps) {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList>
-        <TabsTrigger value="list">My Resumes ({resumes.length})</TabsTrigger>
-        <TabsTrigger value="upload">Upload New Resume</TabsTrigger>
+        <TabsTrigger value="list" className=' cursor-pointer'>My Resumes ({resumes.length})</TabsTrigger>
+        <TabsTrigger value="upload" className=' cursor-pointer'>Upload New Resume</TabsTrigger>
       </TabsList>
       
       <TabsContent value="list" className="space-y-6">

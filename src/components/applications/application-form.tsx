@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { applicationSchema, ApplicationFormData } from '@/schemas/application'
 import { createApplication } from '@/actions/applications'
-import { getResumes } from '@/actions/resumes'
+import { useResumes } from '@/hooks/use-resumes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -33,32 +33,10 @@ const applicationSourceOptions = [
 export function ApplicationForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [resumes, setResumes] = useState<Array<{
-    id: string
-    title: string
-    fileName: string | null
-    isBase: boolean
-    _count: { applications: number }
-  }>>([])
-  const [loadingResumes, setLoadingResumes] = useState(true)
   const router = useRouter()
 
-  // Load resumes on component mount
-  useEffect(() => {
-    async function fetchResumes() {
-      try {
-        const result = await getResumes()
-        if (result && result.success && result.resumes) {
-          setResumes(result.resumes)
-        }
-      } catch (error) {
-        console.error('Failed to load resumes:', error)
-      } finally {
-        setLoadingResumes(false)
-      }
-    }
-    fetchResumes()
-  }, [])
+  // Use React Query hook for resumes
+  const { data: resumes = [], isLoading: loadingResumes, error: resumesError } = useResumes()
 
   const {
     register,
@@ -167,7 +145,12 @@ export function ApplicationForm() {
                 ))}
               </SelectContent>
             </Select>
-            {resumes.length === 0 && !loadingResumes && (
+            {resumesError && (
+              <p className="text-sm text-red-500">
+                Failed to load resumes: {resumesError.message}
+              </p>
+            )}
+            {resumes.length === 0 && !loadingResumes && !resumesError && (
               <p className="text-sm text-gray-500">
                 No resumes available. <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => router.push('/dashboard/resumes')}>Upload a resume first</span>
               </p>

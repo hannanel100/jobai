@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { updateApplicationStatus, deleteApplication } from '@/actions/applications'
+import { useUpdateApplicationStatus, useDeleteApplication } from '@/hooks/use-applications'
 import { format } from 'date-fns'
 import { Search, Calendar, DollarSign, ExternalLink, Trash2, Edit, FileText } from 'lucide-react'
 import Link from 'next/link'
@@ -51,8 +51,11 @@ const statusLabels = {
 export function ApplicationsList({ applications }: ApplicationsListProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>('all')
-  const [isUpdating, setIsUpdating] = useState<string | null>(null)
   const router = useRouter()
+
+  // React Query mutations
+  const updateStatusMutation = useUpdateApplicationStatus()
+  const deleteApplicationMutation = useDeleteApplication()
 
   const filteredApplications = applications.filter((app) => {
     const matchesSearch = 
@@ -65,36 +68,14 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
   })
 
   const handleStatusChange = async (applicationId: string, newStatus: ApplicationStatus) => {
-    setIsUpdating(applicationId)
-    try {
-      const result = await updateApplicationStatus(applicationId, newStatus)
-      if (result.success) {
-        router.refresh()
-      } else {
-        console.error('Failed to update status:', result.error)
-      }
-    } catch (error) {
-      console.error('Error updating status:', error)
-    } finally {
-      setIsUpdating(null)
-    }
+    updateStatusMutation.mutate({ id: applicationId, status: newStatus })
   }
 
   const handleDelete = async (applicationId: string) => {
     if (!confirm('Are you sure you want to delete this application?')) {
       return
     }
-
-    try {
-      const result = await deleteApplication(applicationId)
-      if (result.success) {
-        router.refresh()
-      } else {
-        console.error('Failed to delete application:', result.error)
-      }
-    } catch (error) {
-      console.error('Error deleting application:', error)
-    }
+    deleteApplicationMutation.mutate(applicationId)
   }
 
   return (
@@ -211,11 +192,10 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
               )}
 
               {/* Actions */}
-              <div className="flex flex-wrap gap-3 pt-4 border-t">
-                <Select
+              <div className="flex flex-wrap gap-3 pt-4 border-t">                <Select
                   value={application.status}
                   onValueChange={(value) => handleStatusChange(application.id, value as ApplicationStatus)}
-                  disabled={isUpdating === application.id}
+                  disabled={updateStatusMutation.isPending}
                 >
                   <SelectTrigger className="w-48">
                     <SelectValue />
