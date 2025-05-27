@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { getApplications } from '@/actions/applications'
+import { ApplicationsList } from '@/components/applications/applications-list'
 
 export default async function ApplicationsPage() {
   const session = await auth()
@@ -10,6 +12,9 @@ export default async function ApplicationsPage() {
   if (!session) {
     redirect('/auth/login')
   }
+
+  const result = await getApplications()
+  const applications = result.success ? result.applications : []
 
   return (
     <div className="space-y-8">
@@ -27,7 +32,7 @@ export default async function ApplicationsPage() {
         </Button>
       </div>
 
-      <div className="grid gap-6">
+      {applications.length === 0 ? (
         <Card>
           <CardHeader>
             <CardTitle>No Applications Yet</CardTitle>
@@ -43,7 +48,9 @@ export default async function ApplicationsPage() {
             </Button>
           </CardContent>
         </Card>
-      </div>
+      ) : (
+        <ApplicationsList applications={applications} />
+      )}
     </div>
   )
 }
