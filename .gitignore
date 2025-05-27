@@ -23,6 +23,12 @@
 # misc
 .DS_Store
 *.pem
+*.p12
+*.pfx
+*.key
+*.cer
+*.crt
+*.pub
 
 # debug
 npm-debug.log*
@@ -39,3 +45,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Node
+.npm
+
+# Prisma
+prisma/migrations/*/*.sql
+prisma/dev.db
+prisma/dev.db-journal
+
+# VSCode
+.vscode/
+
+# Turbopack
+.turbo/
