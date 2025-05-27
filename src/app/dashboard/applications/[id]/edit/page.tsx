@@ -4,9 +4,9 @@ import { getApplication } from '@/actions/applications'
 import { EditApplicationForm } from '@/components/applications/edit-application-form'
 
 interface EditApplicationPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function EditApplicationPage({ params }: EditApplicationPageProps) {
@@ -16,7 +16,8 @@ export default async function EditApplicationPage({ params }: EditApplicationPag
     redirect('/auth/login')
   }
 
-  const result = await getApplication(params.id)
+  const { id } = await params
+  const result = await getApplication(id)
 
   if (!result.success || !result.application) {
     redirect('/dashboard/applications')
