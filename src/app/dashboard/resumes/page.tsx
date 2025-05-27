@@ -1,8 +1,7 @@
 import { auth } from '@/auth'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import Link from 'next/link'
+import { getResumes } from '@/actions/resumes'
 import { redirect } from 'next/navigation'
+import { ResumesClient } from '@/components/resumes/resumes-client'
 
 export default async function ResumesPage() {
   const session = await auth()
@@ -10,6 +9,8 @@ export default async function ResumesPage() {
   if (!session) {
     redirect('/auth/login')
   }
+  const resumesResult = await getResumes()
+  const resumes = resumesResult.success ? resumesResult.resumes! : []
 
   return (
     <div className="space-y-8">
@@ -17,33 +18,12 @@ export default async function ResumesPage() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Resume Management</h2>
           <p className="text-muted-foreground">
-            Manage your resumes and get AI-powered optimization suggestions
+            Upload and manage your resumes for job applications
           </p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/resumes/upload">
-            Upload Resume
-          </Link>
-        </Button>
       </div>
 
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>No Resumes Yet</CardTitle>
-            <CardDescription>
-              Upload your resume to get started with AI-powered optimization and tailored versions for each job application.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/dashboard/resumes/upload">
-                Upload Your First Resume
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <ResumesClient resumes={resumes} />
     </div>
   )
 }
