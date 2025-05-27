@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { updateApplicationStatus, deleteApplication } from '@/actions/applications'
 import { format } from 'date-fns'
-import { Search, Calendar, DollarSign, ExternalLink, Trash2, Edit } from 'lucide-react'
+import { Search, Calendar, DollarSign, ExternalLink, Trash2, Edit, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -150,8 +150,7 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
               </div>
             </CardHeader>
             
-            <CardContent className="space-y-4">
-              {/* Application Details */}
+            <CardContent className="space-y-4">              {/* Application Details */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 {application.applicationDeadline && (
                   <div className="flex items-center gap-2">
@@ -188,6 +187,21 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                   </div>
                 )}
               </div>
+
+              {/* Resume Information */}
+              {application.resume ? (
+                <div className="flex items-center gap-2 text-sm">
+                  <FileText className="h-4 w-4 text-green-600" />
+                  <span className="text-green-700">
+                    Resume: <span className="font-medium">{application.resume.title}</span>
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm">
+                  <FileText className="h-4 w-4 text-amber-500" />
+                  <span className="text-amber-700">No resume selected</span>
+                </div>
+              )}
 
               {/* Notes */}
               {application.notes && (

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { applicationSchema, ApplicationFormData } from '@/schemas/application'
 import { createApplication } from '@/actions/applications'
+import { getResumes } from '@/actions/resumes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -32,7 +33,32 @@ const applicationSourceOptions = [
 export function ApplicationForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [resumes, setResumes] = useState<Array<{
+    id: string
+    title: string
+    fileName: string | null
+    isBase: boolean
+    _count: { applications: number }
+  }>>([])
+  const [loadingResumes, setLoadingResumes] = useState(true)
   const router = useRouter()
+
+  // Load resumes on component mount
+  useEffect(() => {
+    async function fetchResumes() {
+      try {
+        const result = await getResumes()
+        if (result && result.success && result.resumes) {
+          setResumes(result.resumes)
+        }
+      } catch (error) {
+        console.error('Failed to load resumes:', error)
+      } finally {
+        setLoadingResumes(false)
+      }
+    }
+    fetchResumes()
+  }, [])
 
   const {
     register,
@@ -109,9 +135,7 @@ export function ApplicationForm() {
                 <p className="text-sm text-red-500">{errors.positionTitle.message}</p>
               )}
             </div>
-          </div>
-
-          <div className="space-y-2">
+          </div>          <div className="space-y-2">
             <Label htmlFor="jobDescription">Job Description *</Label>
             <Textarea
               id="jobDescription"
@@ -121,6 +145,32 @@ export function ApplicationForm() {
             />
             {errors.jobDescription && (
               <p className="text-sm text-red-500">{errors.jobDescription.message}</p>
+            )}
+          </div>          <div className="space-y-2">
+            <Label htmlFor="resumeId">Resume to Use</Label>
+            <Select onValueChange={(value) => setValue('resumeId', value === 'none' ? null : value)}>
+              <SelectTrigger>
+                <SelectValue placeholder={loadingResumes ? "Loading resumes..." : "Select a resume (optional)"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No resume selected</SelectItem>
+                {resumes.map((resume) => (
+                  <SelectItem key={resume.id} value={resume.id}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{resume.title}</span>
+                      <span className="text-xs text-gray-500">
+                        {resume.fileName} • Used in {resume._count.applications} applications
+                        {resume.isBase && " • Base template"}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {resumes.length === 0 && !loadingResumes && (
+              <p className="text-sm text-gray-500">
+                No resumes available. <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => router.push('/dashboard/resumes')}>Upload a resume first</span>
+              </p>
             )}
           </div>
 

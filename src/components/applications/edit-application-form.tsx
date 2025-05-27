@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { applicationUpdateSchema, ApplicationUpdateData } from '@/schemas/application'
 import { updateApplication } from '@/actions/applications'
+import { getResumes } from '@/actions/resumes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,7 +37,32 @@ interface EditApplicationFormProps {
 export function EditApplicationForm({ application }: EditApplicationFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [resumes, setResumes] = useState<Array<{
+    id: string
+    title: string
+    fileName: string | null
+    isBase: boolean
+    _count: { applications: number }
+  }>>([])
+  const [loadingResumes, setLoadingResumes] = useState(true)
   const router = useRouter()
+
+  // Load resumes on component mount
+  useEffect(() => {
+    async function fetchResumes() {
+      try {
+        const result = await getResumes()
+        if (result && result.success && result.resumes) {
+          setResumes(result.resumes)
+        }
+      } catch (error) {
+        console.error('Failed to load resumes:', error)
+      } finally {
+        setLoadingResumes(false)
+      }
+    }
+    fetchResumes()
+  }, [])
   const {
     register,
     handleSubmit,
@@ -52,11 +78,11 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
       applicationDeadline: application.applicationDeadline ? new Date(application.applicationDeadline) : undefined,
       salaryMin: application.salaryMin || undefined,
       salaryMax: application.salaryMax || undefined,
-      currency: application.currency as 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'ILS',
-      companyWebsite: application.companyWebsite || '',
+      currency: application.currency as 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'ILS',      companyWebsite: application.companyWebsite || '',
       applicationSource: application.applicationSource || undefined,
       notes: application.notes || '',
       followUpDate: application.followUpDate ? new Date(application.followUpDate) : undefined,
+      resumeId: application.resumeId || null,
     },
   })
 
@@ -122,9 +148,7 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
                 <p className="text-sm text-red-500">{errors.positionTitle.message}</p>
               )}
             </div>
-          </div>
-
-          <div className="space-y-2">
+          </div>          <div className="space-y-2">
             <Label htmlFor="jobDescription">Job Description *</Label>
             <Textarea
               id="jobDescription"
@@ -134,6 +158,35 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
             />
             {errors.jobDescription && (
               <p className="text-sm text-red-500">{errors.jobDescription.message}</p>
+            )}
+          </div>          <div className="space-y-2">
+            <Label htmlFor="resumeId">Resume to Use</Label>
+            <Select 
+              onValueChange={(value) => setValue('resumeId', value === 'none' ? null : value)}
+              defaultValue={application.resumeId || "none"}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={loadingResumes ? "Loading resumes..." : "Select a resume (optional)"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No resume selected</SelectItem>
+                {resumes.map((resume) => (
+                  <SelectItem key={resume.id} value={resume.id}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{resume.title}</span>
+                      <span className="text-xs text-gray-500">
+                        {resume.fileName} • Used in {resume._count.applications} applications
+                        {resume.isBase && " • Base template"}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {resumes.length === 0 && !loadingResumes && (
+              <p className="text-sm text-gray-500">
+                No resumes available. <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => router.push('/dashboard/resumes')}>Upload a resume first</span>
+              </p>
             )}
           </div>
 

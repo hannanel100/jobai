@@ -54,9 +54,7 @@ export async function getResumes() {
     
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' }
-    }
-
-    const resumes = await db.resume.findMany({
+    }    const resumes = await db.resume.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -64,6 +62,19 @@ export async function getResumes() {
           select: {
             applications: true,
           },
+        },
+        applications: {
+          select: {
+            id: true,
+            companyName: true,
+            positionTitle: true,
+            status: true,
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 3, // Show only the latest 3 applications
         },
       },
     })
