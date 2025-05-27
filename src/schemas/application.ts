@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ApplicationSource, ApplicationStatus } from '@prisma/client'
+import { ApplicationSource } from '@prisma/client'
 
 const baseApplicationSchema = z.object({
   companyName: z.string().min(1, 'Company name is required').max(100, 'Company name is too long'),

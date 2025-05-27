@@ -6,10 +6,7 @@ const { auth } = NextAuth(authConfig)
 
 // Note: This is a basic middleware setup. 
 // You'll likely want to expand on this to protect specific routes.
-export default auth((req) => {
-  const { nextUrl } = req
-  const isLoggedIn = !!req.auth
-
+export default auth(() => {
   // Example: Redirect to login if trying to access a protected route and not logged in
   // const isProtectedRoute = nextUrl.pathname.startsWith("/dashboard") // Define your protected routes
   // if (isProtectedRoute && !isLoggedIn) {

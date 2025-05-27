@@ -72,11 +72,10 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
 
       if (result.success) {
         router.push('/dashboard/applications')
-        router.refresh()
-      } else {
+        router.refresh()      } else {
         setError(result.error || 'Failed to update application')
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setIsLoading(false)

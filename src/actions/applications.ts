@@ -4,7 +4,6 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { applicationSchema, ApplicationFormData, applicationUpdateSchema, ApplicationUpdateData } from '@/schemas/application'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { ApplicationStatus } from '@prisma/client'
 
 export async function createApplication(data: ApplicationFormData) {

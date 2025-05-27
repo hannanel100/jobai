@@ -34,9 +34,8 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">
-            Welcome back, {session.user?.firstName || 'User'}! Here's your job search overview.
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>          <p className="text-muted-foreground">
+            Welcome back, {session.user?.firstName || 'User'}! Here&apos;s your job search overview.
           </p>
         </div>
         <form action={logout}>

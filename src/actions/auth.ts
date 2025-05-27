@@ -5,7 +5,6 @@ import { db } from '@/lib/db'
 import { LoginSchema, RegisterSchema } from '@/schemas/auth'
 import bcrypt from 'bcryptjs'
 import { AuthError } from 'next-auth'
-import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
 export async function login(values: z.infer<typeof LoginSchema>) {

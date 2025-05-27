@@ -59,11 +59,10 @@ export function ApplicationForm() {
 
       if (result.success) {
         router.push('/dashboard/applications')
-        router.refresh()
-      } else {
+        router.refresh()      } else {
         setError(result.error || 'Failed to create application')
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setIsLoading(false)

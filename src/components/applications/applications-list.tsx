@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Application, ApplicationStatus, ApplicationSource } from '@prisma/client'
+import { Application, ApplicationStatus } from '@prisma/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
