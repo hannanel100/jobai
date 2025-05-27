@@ -161,7 +161,10 @@ export function ApplicationForm() {
               <Label htmlFor="salaryMin">Min Salary</Label>
               <Input
                 id="salaryMin"
-                {...register('salaryMin', { valueAsNumber: true })}
+                {...register('salaryMin', { 
+                  valueAsNumber: true,
+                  setValueAs: (v) => v === '' ? null : Number(v) || null
+                })}
                 type="number"
                 placeholder="50000"
                 min="0"
@@ -175,7 +178,10 @@ export function ApplicationForm() {
               <Label htmlFor="salaryMax">Max Salary</Label>
               <Input
                 id="salaryMax"
-                {...register('salaryMax', { valueAsNumber: true })}
+                {...register('salaryMax', { 
+                  valueAsNumber: true,
+                  setValueAs: (v) => v === '' ? null : Number(v) || null
+                })}
                 type="number"
                 placeholder="80000"
                 min="0"
@@ -187,16 +193,16 @@ export function ApplicationForm() {
 
             <div className="space-y-2">
               <Label htmlFor="currency">Currency</Label>
-              <Select onValueChange={(value) => setValue('currency', value)} defaultValue="USD">
+              <Select onValueChange={(value) => setValue('currency', value as 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'ILS')} defaultValue="USD">
                 <SelectTrigger>
                   <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
+                </SelectTrigger>                <SelectContent>
                   <SelectItem value="USD">USD</SelectItem>
                   <SelectItem value="EUR">EUR</SelectItem>
                   <SelectItem value="GBP">GBP</SelectItem>
                   <SelectItem value="CAD">CAD</SelectItem>
                   <SelectItem value="AUD">AUD</SelectItem>
+                  <SelectItem value="ILS">ILS</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -218,7 +224,7 @@ export function ApplicationForm() {
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={applicationDeadline}
+                    selected={applicationDeadline || undefined}
                     onSelect={(date) => setValue('applicationDeadline', date)}
                     initialFocus
                   />
@@ -241,7 +247,7 @@ export function ApplicationForm() {
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={followUpDate}
+                    selected={followUpDate || undefined}
                     onSelect={(date) => setValue('followUpDate', date)}
                     initialFocus
                   />

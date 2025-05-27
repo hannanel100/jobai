@@ -52,7 +52,7 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
       applicationDeadline: application.applicationDeadline ? new Date(application.applicationDeadline) : undefined,
       salaryMin: application.salaryMin || undefined,
       salaryMax: application.salaryMax || undefined,
-      currency: application.currency,
+      currency: application.currency as 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'ILS',
       companyWebsite: application.companyWebsite || '',
       applicationSource: application.applicationSource || undefined,
       notes: application.notes || '',
@@ -177,7 +177,10 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
               <Label htmlFor="salaryMin">Min Salary</Label>
               <Input
                 id="salaryMin"
-                {...register('salaryMin', { valueAsNumber: true })}
+                {...register('salaryMin', { 
+                  valueAsNumber: true,
+                  setValueAs: (v) => v === '' ? null : Number(v) || null
+                })}
                 type="number"
                 placeholder="50000"
                 min="0"
@@ -191,7 +194,10 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
               <Label htmlFor="salaryMax">Max Salary</Label>
               <Input
                 id="salaryMax"
-                {...register('salaryMax', { valueAsNumber: true })}
+                {...register('salaryMax', { 
+                  valueAsNumber: true,
+                  setValueAs: (v) => v === '' ? null : Number(v) || null
+                })}
                 type="number"
                 placeholder="80000"
                 min="0"
@@ -202,20 +208,19 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
-              <Select 
-                onValueChange={(value) => setValue('currency', value)} 
-                defaultValue={application.currency}
+              <Label htmlFor="currency">Currency</Label>              <Select 
+                onValueChange={(value) => setValue('currency', value as 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'ILS')} 
+                defaultValue={application.currency as 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'ILS'}
               >
                 <SelectTrigger>
                   <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
+                </SelectTrigger>                <SelectContent>
                   <SelectItem value="USD">USD</SelectItem>
                   <SelectItem value="EUR">EUR</SelectItem>
                   <SelectItem value="GBP">GBP</SelectItem>
                   <SelectItem value="CAD">CAD</SelectItem>
                   <SelectItem value="AUD">AUD</SelectItem>
+                  <SelectItem value="ILS">ILS</SelectItem>
                 </SelectContent>
               </Select>
             </div>

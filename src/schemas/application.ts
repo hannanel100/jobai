@@ -8,7 +8,7 @@ const baseApplicationSchema = z.object({
   applicationDeadline: z.date().optional().nullable(),
   salaryMin: z.number().min(0, 'Minimum salary must be positive').optional().nullable(),
   salaryMax: z.number().min(0, 'Maximum salary must be positive').optional().nullable(),
-  currency: z.string().default('USD'),
+  currency: z.enum(['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'ILS']),
   companyWebsite: z.string().url('Invalid website URL').optional().nullable().or(z.literal('')),
   applicationSource: z.nativeEnum(ApplicationSource).optional().nullable(),
   notes: z.string().max(2000, 'Notes are too long').optional().nullable(),
