@@ -16,11 +16,12 @@ export default async function DashboardPage() {
 
   const result = await getApplications()
   const applications = result.success ? result.applications : []
-
   // Calculate statistics
   const totalApplications = applications.length
   const inProgressApplications = applications.filter(app => 
-    [ApplicationStatus.APPLIED, ApplicationStatus.APPLICATION_ACKNOWLEDGED, ApplicationStatus.INTERVIEW_SCHEDULED].includes(app.status)
+    app.status === ApplicationStatus.APPLIED || 
+    app.status === ApplicationStatus.APPLICATION_ACKNOWLEDGED || 
+    app.status === ApplicationStatus.INTERVIEW_SCHEDULED
   ).length
   const interviewsScheduled = applications.filter(app => 
     app.status === ApplicationStatus.INTERVIEW_SCHEDULED
