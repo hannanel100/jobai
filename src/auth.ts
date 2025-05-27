@@ -41,7 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],  callbacks: {
     // Use JWT to store session information
     async jwt({ token, user }) {
-      if (user) {
+      if (user && user.id) {
         token.id = user.id
         token.firstName = user.firstName
         token.lastName = user.lastName
