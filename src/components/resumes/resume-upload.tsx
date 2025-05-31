@@ -18,52 +18,54 @@ export function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
   const [isBase, setIsBase] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
-  
-  const handleUploadComplete = async (res: Array<{
+    const handleUploadComplete = async (res: Array<{
     name: string;
-    ufsUrl: string;
+    url: string;
     size: number;
     type: string;
-    parsedContent?: {
-      text: string;
-      metadata?: any;
-      wordCount: number;
-      extractedAt: string;
-    } | null;
-    parseError?: string | null;
-  }>) => {
-    console.log("Upload complete called with:", res);
+    serverData?: {
+      uploadedBy: string;
+      url: string;
+      name: string;
+      size: number;
+      type: string;
+      parsedContent?: {
+        text: string;
+        metadata?: any;
+        wordCount: number;
+        extractedAt: string;
+      } | null;
+      parseError?: string | null;
+    };  }>) => {
     if (!res || res.length === 0) {
-      console.log("No files in response");
       return;
     }
     
     const file = res[0];
-    console.log("Processing file:", file);
+    
+    // Extract the parsed content from serverData
+    const parsedContent = file.serverData?.parsedContent;
+    const parseError = file.serverData?.parseError;
     
     try {
-      setIsUploading(true);
-      
-      // Show feedback about parsing results
-      if (file.parseError) {
-        console.warn("Resume parsing failed:", file.parseError);
+      setIsUploading(true);      // Show feedback about parsing results
+      if (parseError) {
         toast.warning("Resume uploaded but text extraction failed. You can manually add content later.");
-      } else if (file.parsedContent) {
-        console.log("Resume parsed successfully, word count:", file.parsedContent.wordCount);
-        toast.success(`Resume uploaded and parsed! Extracted ${file.parsedContent.wordCount} words.`);
+      } else if (parsedContent) {
+        toast.success(`Resume uploaded and parsed! Extracted ${parsedContent.wordCount} words.`);
       }
         const result = await createResume({
         title: title || file.name.replace(/\.[^/.]+$/, ""), // Use filename without extension if no title
         fileName: file.name,
-        fileUrl: file.ufsUrl,
+        fileUrl: file.url, // Use file.url instead of file.ufsUrl
         fileSize: file.size,
         fileType: file.type,
-        content: file.parsedContent || null, // Include complete parsed content object
+        content: parsedContent || null, // Use extracted parsedContent
         isBase,
       });
 
       if (result.success) {
-        if (!file.parseError) {
+        if (!parseError) {
           toast.success("Resume uploaded and content extracted successfully!");
         }
         setTitle("");
@@ -72,23 +74,18 @@ export function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
         router.refresh();
       } else {
         toast.error(result.error || "Failed to upload resume");
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
+      }    } catch (error) {
       toast.error("Failed to upload resume");
     } finally {
       setIsUploading(false);
     }
   };
-
   const handleUploadError = (error: Error) => {
-    console.error("Upload error:", error);
     toast.error("Failed to upload file. Please try again.");
     setIsUploading(false);
   };
   
   const handleUploadBegin = () => {
-    console.log("CLIENT: Upload starting...");
     setIsUploading(true);
   };
 

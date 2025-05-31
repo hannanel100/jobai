@@ -24,22 +24,18 @@ export async function createResume(data: CreateResumeData) {
     
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' }
-    }
-
-    const validatedData = createResumeSchema.parse(data)
+    }    const validatedData = createResumeSchema.parse(data)
 
     const resume = await db.resume.create({
       data: {
         ...validatedData,
         userId: session.user.id,
-      },
-    })
+      },    })
 
     revalidatePath('/dashboard/resumes')
     return { success: true, resume }
   } catch (error) {
-    console.error('Failed to create resume:', error)
-    return { 
+    return {
       success: false, 
       error: error instanceof z.ZodError 
         ? error.errors[0].message 
