@@ -17,28 +17,55 @@ export function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
   const [title, setTitle] = useState("");
   const [isBase, setIsBase] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const router = useRouter();  
-    const handleUploadComplete = async (res: Array<{ name: string; url: string; size: number }>) => {
+  const router = useRouter();
+  
+  const handleUploadComplete = async (res: Array<{
+    name: string;
+    ufsUrl: string;
+    size: number;
+    type: string;
+    parsedContent?: {
+      text: string;
+      metadata?: any;
+      wordCount: number;
+      extractedAt: string;
+    } | null;
+    parseError?: string | null;
+  }>) => {
     console.log("Upload complete called with:", res);
     if (!res || res.length === 0) {
       console.log("No files in response");
       return;
     }
+    
     const file = res[0];
     console.log("Processing file:", file);
+    
     try {
       setIsUploading(true);
-      const result = await createResume({
+      
+      // Show feedback about parsing results
+      if (file.parseError) {
+        console.warn("Resume parsing failed:", file.parseError);
+        toast.warning("Resume uploaded but text extraction failed. You can manually add content later.");
+      } else if (file.parsedContent) {
+        console.log("Resume parsed successfully, word count:", file.parsedContent.wordCount);
+        toast.success(`Resume uploaded and parsed! Extracted ${file.parsedContent.wordCount} words.`);
+      }
+        const result = await createResume({
         title: title || file.name.replace(/\.[^/.]+$/, ""), // Use filename without extension if no title
         fileName: file.name,
-        fileUrl: file.url,
+        fileUrl: file.ufsUrl,
         fileSize: file.size,
-        fileType: file.name.endsWith('.pdf') ? "application/pdf" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        fileType: file.type,
+        content: file.parsedContent || null, // Include complete parsed content object
         isBase,
       });
 
       if (result.success) {
-        toast.success("Resume uploaded successfully!");
+        if (!file.parseError) {
+          toast.success("Resume uploaded and content extracted successfully!");
+        }
         setTitle("");
         setIsBase(false);
         onUploadComplete?.();
@@ -59,18 +86,18 @@ export function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
     toast.error("Failed to upload file. Please try again.");
     setIsUploading(false);
   };
+  
   const handleUploadBegin = () => {
     console.log("CLIENT: Upload starting...");
     setIsUploading(true);
   };
-
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Upload Resume</CardTitle>
         <CardDescription>
-          Upload your resume in PDF or DOCX format (max 4MB)
+          Upload your resume in PDF or DOCX format (max 4MB). Text content will be automatically extracted for AI analysis.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -111,7 +138,7 @@ export function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
 
         {isUploading && (
           <div className="text-center text-sm text-gray-600">
-            Processing upload...
+            Processing upload and extracting content...
           </div>
         )}
       </CardContent>
