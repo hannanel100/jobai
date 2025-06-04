@@ -1,6 +1,7 @@
 'use server'
 
 import { auth } from '@/auth'
+import { getDevSession } from '@/lib/dev-auth'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -46,11 +47,11 @@ export async function createResume(data: CreateResumeData) {
 
 export async function getResumes() {
   try {
-    const session = await auth()
+    const session = await getDevSession()
     
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' }
-    }    const resumes = await db.resume.findMany({
+    }const resumes = await db.resume.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -84,7 +85,7 @@ export async function getResumes() {
 
 export async function getResume(id: string) {
   try {
-    const session = await auth()
+    const session = await getDevSession()
     
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' }
