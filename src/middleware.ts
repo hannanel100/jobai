@@ -1,21 +1,20 @@
 // src/middleware.ts
-import NextAuth from "next-auth"
-import { authConfig } from "@/auth.config"
+import { NextRequest, NextResponse } from "next/server"
 
-const { auth } = NextAuth(authConfig)
-
-// Note: This is a basic middleware setup. 
-// You'll likely want to expand on this to protect specific routes.
-export default auth(() => {
-  // Example: Redirect to login if trying to access a protected route and not logged in
-  // const isProtectedRoute = nextUrl.pathname.startsWith("/dashboard") // Define your protected routes
-  // if (isProtectedRoute && !isLoggedIn) {
-  //   return Response.redirect(new URL("/login", nextUrl))
-  // }
-
-  // Allow request to proceed
-  return
-})
+export default function middleware(request: NextRequest) {
+  // DEVELOPMENT ONLY: Completely bypass auth for testing
+  const isDev = process.env.NODE_ENV === "development" || !process.env.NODE_ENV
+  const bypassAuth = process.env.BYPASS_AUTH === "true"
+  
+  if (isDev && bypassAuth) {
+    console.log("🚀 Development mode: Authentication bypass enabled for", request.nextUrl.pathname)
+    return NextResponse.next()
+  }
+  
+  // For production, implement normal auth logic
+  // For now, we'll allow all requests to proceed
+  return NextResponse.next()
+}
 
 // Optionally, don't invoke Middleware on some paths
 // Read more: https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher

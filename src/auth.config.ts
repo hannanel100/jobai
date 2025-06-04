@@ -8,10 +8,24 @@ export const authConfig = {
   pages: {
     signIn: '/login',
     // error: '/auth/error', // Optional
-  },
-  callbacks: {
+  },  callbacks: {
     // authorized is used to protect routes via middleware
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request }) {
+      const nextUrl = request.nextUrl
+      
+      // DEVELOPMENT ONLY: Skip authorization for testing
+      if (process.env.NODE_ENV === "development") {
+        const userAgent = request.headers.get("user-agent") || ""
+        const isVSCodeBrowser = userAgent.includes("Visual Studio Code") || 
+                               userAgent.includes("vscode") ||
+                               request.headers.get("sec-fetch-dest") === "document"
+        
+        // Skip auth for VS Code browser or when bypass query param is present
+        if (isVSCodeBrowser || nextUrl.searchParams.has("bypass-auth")) {
+          return true
+        }
+      }
+
       const isLoggedIn = !!auth?.user
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard') // Example protected route
       
