@@ -36,6 +36,7 @@ model User {
   resumes           Resume[]
   notifications     Notification[]
   recruiterContacts RecruiterContact[] // Changed from RecruiterContact[] to recruiterContacts RecruiterContact[]
+  resumeAnalyses    ResumeAnalysis[]
 
   @@map("users")
 }
@@ -87,8 +88,29 @@ model Resume {
 
   user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   applications   Application[]
+  analyses       ResumeAnalysis[]
 
   @@map("resumes")
+}
+
+model ResumeAnalysis {
+  id             String          @id @default(cuid())
+  resumeId       String
+  userId         String
+  type           AnalysisType
+  jobDescription String? // For job-specific analyses
+  score          Float? // Overall score (0-100)
+  sections       Json? // Section-wise breakdown (skills, experience, etc.)
+  keywords       Json? // Keyword analysis results
+  suggestions    Json? // AI optimization recommendations
+  metadata       Json? // Additional analysis metadata
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  resume         Resume          @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("resume_analyses")
 }
 
 model Recruiter {
@@ -184,4 +206,10 @@ enum NotificationType {
   PROFILE_VERIFICATION // Added for verification status
   SYSTEM_ANNOUNCEMENT // Added for system wide messages
   WELCOME // Added for new user welcome
+}
+
+enum AnalysisType {
+  COMPREHENSIVE_SCORE
+  JOB_MATCH
+  OPTIMIZATION
 }
