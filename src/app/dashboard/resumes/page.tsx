@@ -1,10 +1,10 @@
-import { auth } from '@/auth'
+import { getDevSession } from '@/lib/dev-auth'
 import { getResumes } from '@/actions/resumes'
 import { redirect } from 'next/navigation'
 import { ResumesClient } from '@/components/resumes/resumes-client'
 
 export default async function ResumesPage() {
-  const session = await auth()
+  const session = await getDevSession()
 
   if (!session) {
     redirect('/auth/login')

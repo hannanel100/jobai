@@ -3,6 +3,7 @@ import { logout } from '@/actions/auth'
 import { getApplications } from '@/actions/applications'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { AIInsightsDashboard } from '@/components/ai/ai-insights-dashboard'
 import { redirect } from 'next/navigation'
 import { ApplicationStatus } from '@prisma/client'
 import Link from 'next/link'
@@ -182,11 +183,13 @@ export default async function DashboardPage() {
                 <Link href="/dashboard/applications">
                   View All Applications
                 </Link>
-              </Button>
-            </CardContent>
+              </Button>            </CardContent>
           </Card>
         </div>
       )}
+
+      {/* AI Insights Section */}
+      <AIInsightsDashboard userId={session.user.id} />
     </div>
   )
 }

@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ResumeContentViewer } from '@/components/resumes/resume-content-viewer'
+import { AIAnalysisControls } from '@/components/ai/ai-analysis-controls'
+import { AnalysisHistory } from '@/components/ai/analysis-history'
 import { useDeleteResume } from '@/hooks/use-resumes'
 import { 
   ArrowLeft, 
@@ -16,7 +19,9 @@ import {
   Building2,
   Users,
   Star,
-  StarOff
+  StarOff,
+  Brain,
+  History
 } from 'lucide-react'
 
 interface Resume {
@@ -48,6 +53,8 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
   const deleteResume = useDeleteResume()
   
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [activeTab, setActiveTab] = useState("content")
 
   const formatFileSize = (bytes: number | null) => {
     if (!bytes) return "Unknown size"
@@ -82,14 +89,18 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
       }
     })
   }
-
   const handleContentUpdated = () => {
     // Refresh the page to get updated content
     router.refresh()
   }
 
+  const handleAnalysisComplete = () => {
+    // Trigger refresh of analysis history
+    setRefreshTrigger(prev => prev + 1)
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <Button 
@@ -103,13 +114,13 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-gray-900">{resume.title}</h1>
           <p className="text-gray-600 mt-1">
-            Resume details and content management
+            Resume details, AI analysis, and content management
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left column - Resume info and actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Left sidebar - Resume info and actions */}
         <div className="space-y-6">
           {/* Resume overview */}
           <Card>
@@ -266,15 +277,48 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
                 </div>
               </CardContent>
             </Card>
-          )}
-        </div>
+          )}        </div>
 
-        {/* Right column - Content viewer */}
-        <div className="lg:col-span-2">
-          <ResumeContentViewer 
-            resume={resume} 
-            onContentUpdated={handleContentUpdated}
-          />
+        {/* Main content area with tabs */}
+        <div className="lg:col-span-3">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="content" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Content
+              </TabsTrigger>
+              <TabsTrigger value="ai-analysis" className="flex items-center gap-2">
+                <Brain className="h-4 w-4" />
+                AI Analysis
+              </TabsTrigger>
+              <TabsTrigger value="history" className="flex items-center gap-2">
+                <History className="h-4 w-4" />
+                History
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="content" className="mt-6">
+              <ResumeContentViewer 
+                resume={resume} 
+                onContentUpdated={handleContentUpdated}
+              />
+            </TabsContent>
+
+            <TabsContent value="ai-analysis" className="mt-6">
+              <AIAnalysisControls
+                resumeId={resume.id}
+                onAnalysisComplete={handleAnalysisComplete}
+                disabled={!resume.content}
+              />
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-6">
+              <AnalysisHistory
+                resumeId={resume.id}
+                refreshTrigger={refreshTrigger}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

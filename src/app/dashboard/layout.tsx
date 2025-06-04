@@ -1,4 +1,4 @@
-import { auth } from '@/auth'
+import { getDevSession } from '@/lib/dev-auth'
 import { logout } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -9,7 +9,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth()
+  const session = await getDevSession()
 
   if (!session) {
     redirect('/auth/login')
@@ -47,7 +47,7 @@ export default async function DashboardLayout({
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-500">
-                Welcome, {session.user?.firstName || session.user?.name || 'User'}
+                Welcome, {session.user?.firstName || 'User'}
               </span>
               <form action={logout}>
                 <Button variant="outline" type="submit" size="sm">
