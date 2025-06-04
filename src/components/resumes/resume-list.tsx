@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { deleteResume } from '@/actions/resumes';
 import { toast } from 'sonner';
-import { FileText, Download, Trash2, Calendar } from 'lucide-react';
+import { FileText, Download, Trash2, Calendar, Eye } from 'lucide-react';
 
 interface Resume {
   id: string;
@@ -66,6 +66,10 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const handleViewDetails = (id: string) => {
+    router.push(`/dashboard/resumes/${id}`);
   };
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDownload = (fileUrl: string, _fileName: string) => {
@@ -148,6 +152,15 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
               </div>
 
               <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleViewDetails(resume.id)}
+                  className="flex items-center gap-1"
+                >
+                  <Eye className="h-4 w-4" />
+                  View Details
+                </Button>
                 {resume.fileUrl && (
                   <Button
                     variant="outline"
