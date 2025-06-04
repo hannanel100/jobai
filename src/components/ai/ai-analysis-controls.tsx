@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -14,9 +14,11 @@ import {
   Loader2,
   Sparkles,
   FileText,
-  Zap
+  Zap,
+  Clock,
+  AlertTriangle
 } from 'lucide-react'
-import { analyzeResume, matchResumeToJobAdHoc, optimizeResume } from '@/actions/ai'
+import { analyzeResume, matchResumeToJobAdHoc, optimizeResume, getRateLimitStatus } from '@/actions/ai'
 import { toast } from 'sonner'
 
 interface AIAnalysisControlsProps {
@@ -36,9 +38,48 @@ export function AIAnalysisControls({
   const [isOptimizing, setIsOptimizing] = useState(false)
   const [jobDescription, setJobDescription] = useState('')
   const [showJobInput, setShowJobInput] = useState(false)
+  const [rateLimit, setRateLimit] = useState<{
+    count: number
+    limit: number
+    remaining: number
+    resetsAt: string
+  } | null>(null)
+  const [loadingRateLimit, setLoadingRateLimit] = useState(true)
 
+  // Load rate limit status on component mount
+  useEffect(() => {
+    loadRateLimitStatus()
+  }, [])
+  const loadRateLimitStatus = async () => {
+    try {
+      const result = await getRateLimitStatus()
+      if (result.success && result.rateLimit) {
+        setRateLimit(result.rateLimit)
+      }
+    } catch (error) {
+      console.error('Failed to load rate limit status:', error)
+    } finally {
+      setLoadingRateLimit(false)
+    }
+  }
+
+  const isRateLimited = Boolean(rateLimit && rateLimit.remaining <= 0)
+
+  const formatTimeUntilReset = (resetsAt: string) => {
+    const resetTime = new Date(resetsAt)
+    const now = new Date()
+    const diffMs = resetTime.getTime() - now.getTime()
+    
+    if (diffMs <= 0) return 'now'
+    
+    const hours = Math.floor(diffMs / (1000 * 60 * 60))
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
+    
+    if (hours > 0) return `${hours}h ${minutes}m`
+    return `${minutes}m`
+  }
   const handleComprehensiveAnalysis = async () => {
-    if (disabled) return
+    if (disabled || isRateLimited) return
 
     setIsAnalyzing(true)
     try {
@@ -46,9 +87,15 @@ export function AIAnalysisControls({
 
       if (result.success) {
         toast.success('Resume analysis completed successfully!')
+        await loadRateLimitStatus() // Refresh rate limit status
         onAnalysisComplete?.()
       } else {
-        toast.error(result.error || 'Failed to analyze resume')
+        if (result.rateLimited) {
+          toast.error('Daily analysis limit reached. Please try again tomorrow.')
+          await loadRateLimitStatus() // Refresh rate limit status
+        } else {
+          toast.error(result.error || 'Failed to analyze resume')
+        }
       }
     } catch (error) {
       console.error('Analysis error:', error)
@@ -57,9 +104,8 @@ export function AIAnalysisControls({
       setIsAnalyzing(false)
     }
   }
-  
-  const handleJobMatching = async () => {
-      if (disabled) return
+    const handleJobMatching = async () => {
+      if (disabled || isRateLimited) return
 
       if (!jobDescription.trim()) {
         toast.error('Please enter a job description')
@@ -78,20 +124,25 @@ export function AIAnalysisControls({
           toast.success('Job matching analysis completed!')
           setJobDescription('')
           setShowJobInput(false)
+          await loadRateLimitStatus() // Refresh rate limit status
           onAnalysisComplete?.()
         } else {
-          toast.error(result.error || 'Failed to match resume to job')
+          if (result.rateLimited) {
+            toast.error('Daily analysis limit reached. Please try again tomorrow.')
+            await loadRateLimitStatus() // Refresh rate limit status
+          } else {
+            toast.error(result.error || 'Failed to match resume to job')
+          }
         }
       } catch (error) {
         console.error('Job matching error:', error)
-        toast.error('Failed to match resume to job')
-      } finally {
+        toast.error('Failed to match resume to job')      } finally {
         setIsMatching(false)
       }
     }
 
     const handleOptimization = async () => {
-      if (disabled) return
+      if (disabled || isRateLimited) return
 
       setIsOptimizing(true)
       try {
@@ -99,9 +150,15 @@ export function AIAnalysisControls({
 
         if (result.success) {
           toast.success('Optimization suggestions generated!')
+          await loadRateLimitStatus() // Refresh rate limit status
           onAnalysisComplete?.()
         } else {
-          toast.error(result.error || 'Failed to generate optimization suggestions')
+          if (result.rateLimited) {
+            toast.error('Daily analysis limit reached. Please try again tomorrow.')
+            await loadRateLimitStatus() // Refresh rate limit status
+          } else {
+            toast.error(result.error || 'Failed to generate optimization suggestions')
+          }
         }
       } catch (error) {
         console.error('Optimization error:', error)
@@ -114,8 +171,7 @@ export function AIAnalysisControls({
     const isAnyAnalysisRunning = isAnalyzing || isMatching || isOptimizing
 
     return (
-      <Card className="w-full">
-        <CardHeader>
+      <Card className="w-full">        <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5" />
             AI Resume Analysis
@@ -123,6 +179,35 @@ export function AIAnalysisControls({
           <CardDescription>
             Get AI-powered insights to improve your resume's effectiveness
           </CardDescription>
+          
+          {/* Rate Limit Display */}
+          {!loadingRateLimit && rateLimit && (
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium">
+                  Daily Usage: {rateLimit.count}/{rateLimit.limit}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {isRateLimited ? (
+                  <Badge variant="destructive" className="flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    Limit Reached
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary">
+                    {rateLimit.remaining} remaining
+                  </Badge>
+                )}
+                {isRateLimited && (
+                  <span className="text-xs text-gray-500">
+                    Resets in {formatTimeUntilReset(rateLimit.resetsAt)}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="space-y-6">
@@ -136,19 +221,20 @@ export function AIAnalysisControls({
               </div>
               <p className="text-xs text-gray-600">
                 Get an overall score and detailed breakdown of your resume's strengths and weaknesses.
-              </p>
-              <Button
+              </p>              <Button
                 onClick={handleComprehensiveAnalysis}
-                disabled={disabled || isAnyAnalysisRunning}
+                disabled={disabled || isAnyAnalysisRunning || isRateLimited}
                 className="w-full"
                 size="sm"
               >
                 {isAnalyzing ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : isRateLimited ? (
+                  <AlertTriangle className="h-4 w-4 mr-2" />
                 ) : (
                   <Star className="h-4 w-4 mr-2" />
                 )}
-                {isAnalyzing ? 'Analyzing...' : 'Analyze Resume'}
+                {isAnalyzing ? 'Analyzing...' : isRateLimited ? 'Limit Reached' : 'Analyze Resume'}
               </Button>
             </div>
 
@@ -160,16 +246,19 @@ export function AIAnalysisControls({
               </div>
               <p className="text-xs text-gray-600">
                 Compare your resume against a specific job description to see how well you match.
-              </p>
-              <Button
+              </p>              <Button
                 onClick={() => setShowJobInput(!showJobInput)}
-                disabled={disabled || isAnyAnalysisRunning}
+                disabled={disabled || isAnyAnalysisRunning || isRateLimited}
                 variant={showJobInput ? "secondary" : "default"}
                 className="w-full"
                 size="sm"
               >
-                <Target className="h-4 w-4 mr-2" />
-                {showJobInput ? 'Hide Job Input' : 'Match to Job'}
+                {isRateLimited ? (
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                ) : (
+                  <Target className="h-4 w-4 mr-2" />
+                )}
+                {isRateLimited ? 'Limit Reached' : (showJobInput ? 'Hide Job Input' : 'Match to Job')}
               </Button>
             </div>
 
@@ -181,19 +270,20 @@ export function AIAnalysisControls({
               </div>
               <p className="text-xs text-gray-600">
                 Get specific suggestions to improve your resume's ATS compatibility and impact.
-              </p>
-              <Button
+              </p>              <Button
                 onClick={handleOptimization}
-                disabled={disabled || isAnyAnalysisRunning}
+                disabled={disabled || isAnyAnalysisRunning || isRateLimited}
                 className="w-full"
                 size="sm"
               >
                 {isOptimizing ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : isRateLimited ? (
+                  <AlertTriangle className="h-4 w-4 mr-2" />
                 ) : (
                   <TrendingUp className="h-4 w-4 mr-2" />
                 )}
-                {isOptimizing ? 'Optimizing...' : 'Optimize Resume'}
+                {isOptimizing ? 'Optimizing...' : isRateLimited ? 'Limit Reached' : 'Optimize Resume'}
               </Button>
             </div>
           </div>
@@ -209,13 +299,11 @@ export function AIAnalysisControls({
                   <Badge variant="secondary" className="text-xs">
                     AI Analysis
                   </Badge>
-                </div>
-
-                <Textarea
+                </div>                <Textarea
                   placeholder="Paste the job description here..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  disabled={disabled || isAnyAnalysisRunning}
+                  disabled={disabled || isAnyAnalysisRunning || isRateLimited}
                   className="min-h-[120px] resize-none"
                 />
 
@@ -237,18 +325,19 @@ export function AIAnalysisControls({
                       disabled={isAnyAnalysisRunning}
                     >
                       Cancel
-                    </Button>
-                    <Button
+                    </Button>                    <Button
                       onClick={handleJobMatching}
-                      disabled={disabled || isAnyAnalysisRunning || !jobDescription.trim()}
+                      disabled={disabled || isAnyAnalysisRunning || !jobDescription.trim() || isRateLimited}
                       size="sm"
                     >
                       {isMatching ? (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : isRateLimited ? (
+                        <AlertTriangle className="h-4 w-4 mr-2" />
                       ) : (
                         <Zap className="h-4 w-4 mr-2" />
                       )}
-                      {isMatching ? 'Analyzing...' : 'Run Analysis'}
+                      {isMatching ? 'Analyzing...' : isRateLimited ? 'Limit Reached' : 'Run Analysis'}
                     </Button>
                   </div>
                 </div>

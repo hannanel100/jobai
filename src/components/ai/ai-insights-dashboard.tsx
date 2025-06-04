@@ -14,9 +14,10 @@ import {
   Clock,
   Zap,
   ChevronRight,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react'
-import { getResumeAnalyses } from '@/actions/ai'
+import { getResumeAnalyses, getRateLimitStatus } from '@/actions/ai'
 import { ResumeAnalysis, AnalysisType } from '@prisma/client'
 import Link from 'next/link'
 
@@ -31,37 +32,51 @@ interface AnalysisWithData extends ResumeAnalysis {
   }
 }
 
-export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
-  const [recentAnalyses, setRecentAnalyses] = useState<AnalysisWithData[]>([])
+export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {  const [recentAnalyses, setRecentAnalyses] = useState<AnalysisWithData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [rateLimit, setRateLimit] = useState<{
+    count: number
+    limit: number
+    remaining: number
+    resetsAt: string
+  } | null>(null)
+  
   const [stats, setStats] = useState({
     totalAnalyses: 0,
     averageScore: 0,
     topScore: 0,
     analysesToday: 0
   })
+
   useEffect(() => {
-    const fetchAnalyses = async () => {
+    const fetchData = async () => {
       try {
-        // Import getUserAnalyses action
-        const { getUserAnalyses } = await import('@/actions/ai')
-        const result = await getUserAnalyses()
-          if (result.success && result.analyses) {
-          setRecentAnalyses(result.analyses)
+        // Fetch both analyses and rate limit status
+        const [analysesResult, rateLimitResult] = await Promise.all([
+          (async () => {
+            const { getUserAnalyses } = await import('@/actions/ai')
+            return getUserAnalyses()
+          })(),
+          getRateLimitStatus()
+        ])
+
+        // Process analyses
+        if (analysesResult.success && analysesResult.analyses) {
+          setRecentAnalyses(analysesResult.analyses)
           setStats({
-            totalAnalyses: result.analyses.length,
-            averageScore: result.analyses.length > 0 
-              ? Math.round(result.analyses.reduce((sum, a) => sum + (a.score || 0), 0) / result.analyses.length)
+            totalAnalyses: analysesResult.analyses.length,
+            averageScore: analysesResult.analyses.length > 0 
+              ? Math.round(analysesResult.analyses.reduce((sum, a) => sum + (a.score || 0), 0) / analysesResult.analyses.length)
               : 0,
-            topScore: Math.max(...result.analyses.map(a => a.score || 0), 0),
-            analysesToday: result.analyses.filter(a => {
+            topScore: Math.max(...analysesResult.analyses.map(a => a.score || 0), 0),
+            analysesToday: analysesResult.analyses.filter(a => {
               const today = new Date()
               const analysisDate = new Date(a.createdAt)
               return analysisDate.toDateString() === today.toDateString()
             }).length
           })
         } else {
-          console.error('Failed to fetch analyses:', result.error)
+          console.error('Failed to fetch analyses:', analysesResult.error)
           setRecentAnalyses([])
           setStats({
             totalAnalyses: 0,
@@ -69,6 +84,9 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
             topScore: 0,
             analysesToday: 0
           })
+        }        // Process rate limit
+        if (rateLimitResult.success && rateLimitResult.rateLimit) {
+          setRateLimit(rateLimitResult.rateLimit)
         }
       } catch (error) {
         console.error('Error fetching AI insights:', error)
@@ -84,7 +102,7 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
       }
     }
 
-    fetchAnalyses()
+    fetchData()
   }, [userId])
 
   const getAnalysisIcon = (type: AnalysisType) => {
@@ -185,9 +203,7 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
               <Target className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
-        </Card>
-
-        <Card>
+        </Card>        <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -199,6 +215,51 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Rate Limit Status */}
+      {rateLimit && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Zap className="h-5 w-5 text-yellow-500" />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">AI Analysis Usage</p>
+                  <p className="text-xs text-gray-500">
+                    {rateLimit.count} of {rateLimit.limit} analyses used today
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium">
+                  {rateLimit.remaining > 0 ? (
+                    <span className="text-green-600">{rateLimit.remaining} remaining</span>
+                  ) : (
+                    <span className="text-red-600">Limit reached</span>
+                  )}
+                </p>
+                {rateLimit.remaining === 0 && (
+                  <p className="text-xs text-gray-500">
+                    Resets {rateLimit.resetsAt}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="mt-2">
+              <Progress 
+                value={(rateLimit.count / rateLimit.limit) * 100} 
+                className="w-full h-2"
+              />
+            </div>
+            {rateLimit.remaining === 0 && (
+              <div className="mt-2 flex items-center gap-2 text-amber-600 text-xs">
+                <AlertTriangle className="h-3 w-3" />
+                <span>Daily limit reached. Rate limit resets at midnight.</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Analyses or Empty State */}
       <Card>

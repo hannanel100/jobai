@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import { getDevSession } from '@/lib/dev-auth'
 import { db } from '@/lib/db'
 import { AIResumeService } from '@/services/ai-resume-service'
+import { checkAIAnalysisRateLimit, createRateLimitErrorMessage } from '@/lib/rate-limit'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -36,6 +37,17 @@ export async function analyzeResume(data: z.infer<typeof analyzeResumeSchema>) {
     
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' }
+    }
+
+    // Check rate limit before processing
+    const rateLimit = await checkAIAnalysisRateLimit(session.user.id)
+    if (!rateLimit.allowed) {
+      return { 
+        success: false, 
+        error: createRateLimitErrorMessage(rateLimit),
+        rateLimited: true,
+        rateLimit
+      }
     }
 
     const validatedData = analyzeResumeSchema.parse(data)
@@ -113,6 +125,17 @@ export async function matchResumeToJob(data: z.infer<typeof matchJobSchema>) {
     
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' }
+    }
+
+    // Check rate limit before processing
+    const rateLimit = await checkAIAnalysisRateLimit(session.user.id)
+    if (!rateLimit.allowed) {
+      return { 
+        success: false, 
+        error: createRateLimitErrorMessage(rateLimit),
+        rateLimited: true,
+        rateLimit
+      }
     }
 
     const validatedData = matchJobSchema.parse(data)
@@ -210,6 +233,17 @@ export async function matchResumeToJobAdHoc(data: z.infer<typeof matchJobAdHocSc
       return { success: false, error: 'Unauthorized' }
     }
 
+    // Check rate limit before processing
+    const rateLimit = await checkAIAnalysisRateLimit(session.user.id)
+    if (!rateLimit.allowed) {
+      return { 
+        success: false, 
+        error: createRateLimitErrorMessage(rateLimit),
+        rateLimited: true,
+        rateLimit
+      }
+    }
+
     const validatedData = matchJobAdHocSchema.parse(data)
 
     // Get the resume with content
@@ -289,6 +323,17 @@ export async function optimizeResume(data: z.infer<typeof optimizeResumeSchema>)
     
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' }
+    }
+
+    // Check rate limit before processing
+    const rateLimit = await checkAIAnalysisRateLimit(session.user.id)
+    if (!rateLimit.allowed) {
+      return { 
+        success: false, 
+        error: createRateLimitErrorMessage(rateLimit),
+        rateLimited: true,
+        rateLimit
+      }
     }
 
     const validatedData = optimizeResumeSchema.parse(data)
@@ -433,6 +478,35 @@ export async function getUserAnalyses() {
     return { 
       success: false, 
       error: 'Failed to get analyses' 
+    }
+  }
+}
+
+export async function getRateLimitStatus() {
+  try {
+    const session = await getDevSession()
+    
+    if (!session?.user?.id) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    const rateLimit = await checkAIAnalysisRateLimit(session.user.id)
+    
+    return { 
+      success: true, 
+      rateLimit: {
+        allowed: rateLimit.allowed,
+        count: rateLimit.count,
+        limit: rateLimit.limit,
+        remaining: rateLimit.limit - rateLimit.count,
+        resetsAt: rateLimit.resetsAt.toISOString(),
+      }
+    }
+  } catch (error) {
+    console.error('Failed to get rate limit status:', error)
+    return { 
+      success: false, 
+      error: 'Failed to get rate limit status' 
     }
   }
 }
