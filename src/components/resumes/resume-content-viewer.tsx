@@ -1,73 +1,80 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { updateResume } from '@/actions/resumes'
-import { toast } from 'sonner'
-import { 
-  FileText, 
-  Edit, 
-  Save, 
-  X, 
-  Info, 
-  Eye, 
+import { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { updateResume } from '@/actions/resumes';
+import { toast } from 'sonner';
+import {
+  FileText,
+  Edit,
+  Save,
+  X,
+  Info,
+  Eye,
   EyeOff,
   Calendar,
-  User,
-  Building2,
-  Hash
-} from 'lucide-react'
+  Hash,
+} from 'lucide-react';
 
 interface ResumeContentViewerProps {
   resume: {
-    id: string
-    title: string
-    fileName: string | null
-    content: any
-    createdAt: Date
-  }
-  onContentUpdated?: () => void
+    id: string;
+    title: string;
+    fileName: string | null;
+    content: ParsedContent | null;
+    createdAt: Date;
+  };
+  onContentUpdated?: () => void;
 }
 
 interface ParsedContent {
-  text: string
+  text: string;
   metadata?: {
-    pages?: number
-    title?: string
-    author?: string
-    subject?: string
-    creator?: string
-    producer?: string
-    creationDate?: string
-    modificationDate?: string
-  }
-  wordCount: number
-  extractedAt: string
+    pages?: number;
+    title?: string;
+    author?: string;
+    subject?: string;
+    creator?: string;
+    producer?: string;
+    creationDate?: string;
+    modificationDate?: string;
+  };
+  wordCount: number;
+  extractedAt: string;
 }
 
-export function ResumeContentViewer({ resume, onContentUpdated }: ResumeContentViewerProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedContent, setEditedContent] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
-  const [showMetadata, setShowMetadata] = useState(false)
+export function ResumeContentViewer({
+  resume,
+  onContentUpdated,
+}: ResumeContentViewerProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [showMetadata, setShowMetadata] = useState(false);
 
-  const parsedContent = resume.content as ParsedContent | null
+  const parsedContent = resume.content as ParsedContent | null;
 
   const handleEdit = () => {
-    setEditedContent(parsedContent?.text || '')
-    setIsEditing(true)
-  }
+    setEditedContent(parsedContent?.text || '');
+    setIsEditing(true);
+  };
 
   const handleSave = async () => {
     if (!editedContent.trim()) {
-      toast.error('Content cannot be empty')
-      return
+      toast.error('Content cannot be empty');
+      return;
     }
 
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       const updatedContent = {
         text: editedContent.trim(),
@@ -75,39 +82,39 @@ export function ResumeContentViewer({ resume, onContentUpdated }: ResumeContentV
         wordCount: editedContent.trim().split(/\s+/).length,
         extractedAt: parsedContent?.extractedAt || new Date().toISOString(),
         lastEditedAt: new Date().toISOString(),
-      }
+      };
 
-      const result = await updateResume(resume.id, { content: updatedContent })
-      
+      const result = await updateResume(resume.id, { content: updatedContent });
+
       if (result.success) {
-        toast.success('Resume content updated successfully!')
-        setIsEditing(false)
-        onContentUpdated?.()
+        toast.success('Resume content updated successfully!');
+        setIsEditing(false);
+        onContentUpdated?.();
       } else {
-        toast.error(result.error || 'Failed to update resume content')
+        toast.error(result.error || 'Failed to update resume content');
       }
     } catch (error) {
-      console.error('Failed to update resume content:', error)
-      toast.error('Failed to update resume content')
+      console.error('Failed to update resume content:', error);
+      toast.error('Failed to update resume content');
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setEditedContent('')
-    setIsEditing(false)
-  }
+    setEditedContent('');
+    setIsEditing(false);
+  };
 
   const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
-      month: 'short', 
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    }).format(new Date(dateString))
-  }
+    }).format(new Date(dateString));
+  };
 
   if (!parsedContent) {
     return (
@@ -115,9 +122,12 @@ export function ResumeContentViewer({ resume, onContentUpdated }: ResumeContentV
         <CardContent className="pt-6">
           <div className="text-center py-8">
             <FileText className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-4 text-lg font-medium text-gray-900">No content extracted</h3>
+            <h3 className="mt-4 text-lg font-medium text-gray-900">
+              No content extracted
+            </h3>
             <p className="mt-2 text-sm text-gray-500">
-              The resume content could not be automatically extracted. You can manually add content by editing this resume.
+              The resume content could not be automatically extracted. You can
+              manually add content by editing this resume.
             </p>
             <Button onClick={handleEdit} className="mt-4">
               <Edit className="h-4 w-4 mr-2" />
@@ -126,7 +136,7 @@ export function ResumeContentViewer({ resume, onContentUpdated }: ResumeContentV
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -150,7 +160,11 @@ export function ResumeContentViewer({ resume, onContentUpdated }: ResumeContentV
                 size="sm"
                 onClick={() => setShowMetadata(!showMetadata)}
               >
-                {showMetadata ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showMetadata ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
                 {showMetadata ? 'Hide' : 'Show'} Details
               </Button>
               {!isEditing && (
@@ -193,37 +207,49 @@ export function ResumeContentViewer({ resume, onContentUpdated }: ResumeContentV
                 {parsedContent.metadata.title && (
                   <div>
                     <span className="font-medium text-gray-700">Title:</span>
-                    <span className="ml-2 text-gray-600">{parsedContent.metadata.title}</span>
+                    <span className="ml-2 text-gray-600">
+                      {parsedContent.metadata.title}
+                    </span>
                   </div>
                 )}
                 {parsedContent.metadata.author && (
                   <div>
                     <span className="font-medium text-gray-700">Author:</span>
-                    <span className="ml-2 text-gray-600">{parsedContent.metadata.author}</span>
+                    <span className="ml-2 text-gray-600">
+                      {parsedContent.metadata.author}
+                    </span>
                   </div>
                 )}
                 {parsedContent.metadata.subject && (
                   <div>
                     <span className="font-medium text-gray-700">Subject:</span>
-                    <span className="ml-2 text-gray-600">{parsedContent.metadata.subject}</span>
+                    <span className="ml-2 text-gray-600">
+                      {parsedContent.metadata.subject}
+                    </span>
                   </div>
                 )}
                 {parsedContent.metadata.creator && (
                   <div>
                     <span className="font-medium text-gray-700">Creator:</span>
-                    <span className="ml-2 text-gray-600">{parsedContent.metadata.creator}</span>
+                    <span className="ml-2 text-gray-600">
+                      {parsedContent.metadata.creator}
+                    </span>
                   </div>
                 )}
                 {parsedContent.metadata.creationDate && (
                   <div>
                     <span className="font-medium text-gray-700">Created:</span>
-                    <span className="ml-2 text-gray-600">{formatDate(parsedContent.metadata.creationDate)}</span>
+                    <span className="ml-2 text-gray-600">
+                      {formatDate(parsedContent.metadata.creationDate)}
+                    </span>
                   </div>
                 )}
                 {parsedContent.metadata.modificationDate && (
                   <div>
                     <span className="font-medium text-gray-700">Modified:</span>
-                    <span className="ml-2 text-gray-600">{formatDate(parsedContent.metadata.modificationDate)}</span>
+                    <span className="ml-2 text-gray-600">
+                      {formatDate(parsedContent.metadata.modificationDate)}
+                    </span>
                   </div>
                 )}
               </div>
@@ -237,10 +263,9 @@ export function ResumeContentViewer({ resume, onContentUpdated }: ResumeContentV
         <CardHeader>
           <CardTitle>Text Content</CardTitle>
           <CardDescription>
-            {isEditing 
+            {isEditing
               ? 'Edit the extracted content below. This will be used for AI analysis and job matching.'
-              : 'This is the text content extracted from your resume. You can edit it to ensure accuracy before AI analysis.'
-            }
+              : 'This is the text content extracted from your resume. You can edit it to ensure accuracy before AI analysis.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -248,7 +273,7 @@ export function ResumeContentViewer({ resume, onContentUpdated }: ResumeContentV
             <div className="space-y-4">
               <Textarea
                 value={editedContent}
-                onChange={(e) => setEditedContent(e.target.value)}
+                onChange={e => setEditedContent(e.target.value)}
                 placeholder="Enter your resume content here..."
                 className="min-h-[400px] font-mono text-sm"
                 disabled={isSaving}
@@ -295,5 +320,5 @@ export function ResumeContentViewer({ resume, onContentUpdated }: ResumeContentV
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

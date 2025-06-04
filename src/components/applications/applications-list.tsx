@@ -1,27 +1,49 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Application, ApplicationStatus } from '@prisma/client'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { useUpdateApplicationStatus, useDeleteApplication } from '@/hooks/use-applications'
-import { format } from 'date-fns'
-import { Search, Calendar, DollarSign, ExternalLink, Trash2, Edit, FileText } from 'lucide-react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react';
+import { Application, ApplicationStatus } from '@prisma/client';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import {
+  useUpdateApplicationStatus,
+  useDeleteApplication,
+} from '@/hooks/use-applications';
+import { format } from 'date-fns';
+import {
+  Search,
+  Calendar,
+  DollarSign,
+  ExternalLink,
+  Trash2,
+  Edit,
+  FileText,
+} from 'lucide-react';
+import Link from 'next/link';
 
 type ApplicationWithResume = Application & {
   resume?: {
-    id: string
-    title: string
-  } | null
-}
+    id: string;
+    title: string;
+  } | null;
+};
 
 interface ApplicationsListProps {
-  applications: ApplicationWithResume[]
+  applications: ApplicationWithResume[];
 }
 
 const statusColors = {
@@ -34,7 +56,7 @@ const statusColors = {
   [ApplicationStatus.OFFER_RECEIVED]: 'bg-green-100 text-green-800',
   [ApplicationStatus.REJECTED]: 'bg-red-100 text-red-800',
   [ApplicationStatus.WITHDRAWN]: 'bg-gray-100 text-gray-800',
-}
+};
 
 const statusLabels = {
   [ApplicationStatus.SAVED]: 'Saved',
@@ -46,37 +68,41 @@ const statusLabels = {
   [ApplicationStatus.OFFER_RECEIVED]: 'Offer Received',
   [ApplicationStatus.REJECTED]: 'Rejected',
   [ApplicationStatus.WITHDRAWN]: 'Withdrawn',
-}
+};
 
 export function ApplicationsList({ applications }: ApplicationsListProps) {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>('all')
-  const router = useRouter()
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>(
+    'all'
+  );
 
   // React Query mutations
-  const updateStatusMutation = useUpdateApplicationStatus()
-  const deleteApplicationMutation = useDeleteApplication()
+  const updateStatusMutation = useUpdateApplicationStatus();
+  const deleteApplicationMutation = useDeleteApplication();
 
-  const filteredApplications = applications.filter((app) => {
-    const matchesSearch = 
+  const filteredApplications = applications.filter(app => {
+    const matchesSearch =
       app.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.positionTitle.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = statusFilter === 'all' || app.status === statusFilter
+      app.positionTitle.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesSearch && matchesStatus
-  })
+    const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
 
-  const handleStatusChange = async (applicationId: string, newStatus: ApplicationStatus) => {
-    updateStatusMutation.mutate({ id: applicationId, status: newStatus })
-  }
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleStatusChange = async (
+    applicationId: string,
+    newStatus: ApplicationStatus
+  ) => {
+    updateStatusMutation.mutate({ id: applicationId, status: newStatus });
+  };
 
   const handleDelete = async (applicationId: string) => {
     if (!confirm('Are you sure you want to delete this application?')) {
-      return
+      return;
     }
-    deleteApplicationMutation.mutate(applicationId)
-  }
+    deleteApplicationMutation.mutate(applicationId);
+  };
 
   return (
     <div className="space-y-6">
@@ -87,11 +113,16 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
           <Input
             placeholder="Search by company or position..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             className="pl-10"
           />
         </div>
-        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ApplicationStatus | 'all')}>
+        <Select
+          value={statusFilter}
+          onValueChange={value =>
+            setStatusFilter(value as ApplicationStatus | 'all')
+          }
+        >
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
@@ -108,17 +139,23 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
 
       {/* Results count */}
       <div className="text-sm text-muted-foreground">
-        Showing {filteredApplications.length} of {applications.length} applications
+        Showing {filteredApplications.length} of {applications.length}{' '}
+        applications
       </div>
 
       {/* Applications Grid */}
       <div className="grid gap-6">
-        {filteredApplications.map((application) => (
-          <Card key={application.id} className="hover:shadow-md transition-shadow">
+        {filteredApplications.map(application => (
+          <Card
+            key={application.id}
+            className="hover:shadow-md transition-shadow"
+          >
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
-                  <CardTitle className="text-xl">{application.positionTitle}</CardTitle>
+                  <CardTitle className="text-xl">
+                    {application.positionTitle}
+                  </CardTitle>
                   <CardDescription className="text-lg font-medium">
                     {application.companyName}
                   </CardDescription>
@@ -130,16 +167,24 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                 </div>
               </div>
             </CardHeader>
-            
-            <CardContent className="space-y-4">              {/* Application Details */}
+
+            <CardContent className="space-y-4">
+              {' '}
+              {/* Application Details */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 {application.applicationDeadline && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-gray-400" />
-                    <span>Deadline: {format(new Date(application.applicationDeadline), 'MMM d, yyyy')}</span>
+                    <span>
+                      Deadline:{' '}
+                      {format(
+                        new Date(application.applicationDeadline),
+                        'MMM d, yyyy'
+                      )}
+                    </span>
                   </div>
                 )}
-                
+
                 {(application.salaryMin || application.salaryMax) && (
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-gray-400" />
@@ -147,17 +192,16 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                       {application.salaryMin && application.salaryMax
                         ? `${application.salaryMin.toLocaleString()} - ${application.salaryMax.toLocaleString()} ${application.currency}`
                         : application.salaryMin
-                        ? `${application.salaryMin.toLocaleString()}+ ${application.currency}`
-                        : `Up to ${application.salaryMax?.toLocaleString()} ${application.currency}`
-                      }
+                          ? `${application.salaryMin.toLocaleString()}+ ${application.currency}`
+                          : `Up to ${application.salaryMax?.toLocaleString()} ${application.currency}`}
                     </span>
                   </div>
                 )}
-                
+
                 {application.companyWebsite && (
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-gray-400" />
-                    <a 
+                    <a
                       href={application.companyWebsite}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -168,13 +212,15 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                   </div>
                 )}
               </div>
-
               {/* Resume Information */}
               {application.resume ? (
                 <div className="flex items-center gap-2 text-sm">
                   <FileText className="h-4 w-4 text-green-600" />
                   <span className="text-green-700">
-                    Resume: <span className="font-medium">{application.resume.title}</span>
+                    Resume:{' '}
+                    <span className="font-medium">
+                      {application.resume.title}
+                    </span>
                   </span>
                 </div>
               ) : (
@@ -183,18 +229,23 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                   <span className="text-amber-700">No resume selected</span>
                 </div>
               )}
-
               {/* Notes */}
               {application.notes && (
                 <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
                   {application.notes}
                 </div>
               )}
-
               {/* Actions */}
-              <div className="flex flex-wrap gap-3 pt-4 border-t">                <Select
+              <div className="flex flex-wrap gap-3 pt-4 border-t">
+                {' '}
+                <Select
                   value={application.status}
-                  onValueChange={(value) => handleStatusChange(application.id, value as ApplicationStatus)}
+                  onValueChange={value =>
+                    handleStatusChange(
+                      application.id,
+                      value as ApplicationStatus
+                    )
+                  }
                   disabled={updateStatusMutation.isPending}
                 >
                   <SelectTrigger className="w-48">
@@ -208,14 +259,12 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                     ))}
                   </SelectContent>
                 </Select>
-
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`/dashboard/applications/${application.id}/edit`}>
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </Link>
                 </Button>
-
                 <Button
                   variant="outline"
                   size="sm"
@@ -226,13 +275,14 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                   Delete
                 </Button>
               </div>
-
               {/* Metadata */}
               <div className="text-xs text-gray-400 pt-2 border-t">
-                Created: {format(new Date(application.createdAt), 'MMM d, yyyy')}
+                Created:{' '}
+                {format(new Date(application.createdAt), 'MMM d, yyyy')}
                 {application.appliedDate && (
                   <span className="ml-4">
-                    Applied: {format(new Date(application.appliedDate), 'MMM d, yyyy')}
+                    Applied:{' '}
+                    {format(new Date(application.appliedDate), 'MMM d, yyyy')}
                   </span>
                 )}
               </div>
@@ -252,8 +302,8 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setSearchTerm('')
-                    setStatusFilter('all')
+                    setSearchTerm('');
+                    setStatusFilter('all');
                   }}
                   className="mt-4"
                 >
@@ -265,5 +315,5 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
         )}
       </div>
     </div>
-  )
+  );
 }

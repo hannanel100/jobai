@@ -12,12 +12,11 @@ declare module 'pdf-parse-debugging-disabled' {
     ModDate?: Date;
     Trapped?: string;
   }
-
   interface PDFData {
     numpages: number;
     numrender: number;
     info: PDFInfo;
-    metadata: any;
+    metadata: Record<string, unknown>;
     text: string;
     version: string;
   }

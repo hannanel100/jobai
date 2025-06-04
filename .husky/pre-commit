@@ -1,0 +1,8 @@
+echo "Ì¥ç Running pre-commit quality checks..."
+# Run lint-staged
+npx lint-staged
+# Run type checking
+echo "Ì¥ß Type checking..."
+npm run type-check
+# If we get here, all checks passed
+echo "‚úÖ All quality checks passed!"

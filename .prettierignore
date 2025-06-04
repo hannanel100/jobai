@@ -1,0 +1,11 @@
+node_modules
+.next
+dist
+build
+*.log
+.env*
+.vercel
+.husky/_
+coverage
+.nyc_output
+*.tsbuildinfo
