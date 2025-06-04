@@ -1,12 +1,12 @@
 import { generateObject } from 'ai';
 import { ai, AI_CONFIG } from '@/lib/ai';
-import { 
-  resumeScoreSchema, 
-  jobMatchSchema, 
+import {
+  resumeScoreSchema,
+  jobMatchSchema,
   resumeOptimizationSchema,
   type ResumeScore,
   type JobMatch,
-  type ResumeOptimization
+  type ResumeOptimization,
 } from '@/schemas/ai';
 
 export class AIResumeService {
@@ -42,7 +42,7 @@ export class AIResumeService {
         - ATS (Applicant Tracking System) compatibility
 
         Be specific and actionable in your feedback.
-      `
+      `,
     });
 
     return result.object;
@@ -52,7 +52,7 @@ export class AIResumeService {
    * Compare resume against a specific job description
    */
   static async matchJobDescription(
-    resumeText: string, 
+    resumeText: string,
     jobDescription: string,
     jobTitle: string,
     company: string
@@ -88,7 +88,7 @@ export class AIResumeService {
         6. Tailoring tips for this specific role
 
         Be thorough and provide actionable insights.
-      `
+      `,
     });
 
     return result.object;
@@ -102,11 +102,11 @@ export class AIResumeService {
     targetIndustry?: string,
     targetRole?: string
   ): Promise<ResumeOptimization> {
-    const industryContext = targetIndustry 
+    const industryContext = targetIndustry
       ? `Target Industry: ${targetIndustry}`
       : 'General optimization';
-    
-    const roleContext = targetRole 
+
+    const roleContext = targetRole
       ? `Target Role: ${targetRole}`
       : 'General role optimization';
 
@@ -139,7 +139,7 @@ export class AIResumeService {
         - Tailoring content for the target industry/role if specified
 
         Provide specific, actionable improvements with clear reasoning.
-      `
+      `,
     });
 
     return result.object;
@@ -167,13 +167,13 @@ export class AIResumeService {
         """
 
         Provide a brief assessment focusing on the overall score and the most important improvements.
-      `
+      `,
     });
 
     return {
       score: result.object.overallScore,
       topIssues: result.object.improvements.slice(0, 3),
-      quickWins: result.object.strengths.slice(0, 3)
+      quickWins: result.object.strengths.slice(0, 3),
     };
   }
 }

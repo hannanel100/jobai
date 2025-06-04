@@ -1,20 +1,25 @@
-'use server'
+'use server';
 
-import { auth } from '@/auth'
-import { db } from '@/lib/db'
-import { applicationSchema, ApplicationFormData, applicationUpdateSchema, ApplicationUpdateData } from '@/schemas/application'
-import { revalidatePath } from 'next/cache'
-import { ApplicationStatus } from '@prisma/client'
+import { auth } from '@/auth';
+import { db } from '@/lib/db';
+import {
+  applicationSchema,
+  ApplicationFormData,
+  applicationUpdateSchema,
+  ApplicationUpdateData,
+} from '@/schemas/application';
+import { revalidatePath } from 'next/cache';
+import { ApplicationStatus } from '@prisma/client';
 
 export async function createApplication(data: ApplicationFormData) {
   try {
-    const session = await auth()
-    
+    const session = await auth();
+
     if (!session?.user?.id) {
-      throw new Error('Unauthorized')
+      throw new Error('Unauthorized');
     }
 
-    const validatedData = applicationSchema.parse(data)
+    const validatedData = applicationSchema.parse(data);
 
     const application = await db.application.create({
       data: {
@@ -22,39 +27,46 @@ export async function createApplication(data: ApplicationFormData) {
         userId: session.user.id,
         status: ApplicationStatus.SAVED,
       },
-    })
+    });
 
-    revalidatePath('/dashboard/applications')
-    
-    return { success: true, application }
+    revalidatePath('/dashboard/applications');
+
+    return { success: true, application };
   } catch (error) {
-    console.error('Error creating application:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to create application' 
-    }
+    console.error('Error creating application:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to create application',
+    };
   }
 }
 
-export async function updateApplication(id: string, data: ApplicationUpdateData) {
+export async function updateApplication(
+  id: string,
+  data: ApplicationUpdateData
+) {
   try {
-    const session = await auth()
-    
+    const session = await auth();
+
     if (!session?.user?.id) {
-      throw new Error('Unauthorized')
+      throw new Error('Unauthorized');
     }
 
     // Validate the partial data
-    const validatedData = applicationUpdateSchema.parse(data)
+    const validatedData = applicationUpdateSchema.parse(data);
 
     // Verify the application belongs to the user
     const existingApplication = await db.application.findUnique({
       where: { id },
-      select: { userId: true }
-    })
+      select: { userId: true },
+    });
 
-    if (!existingApplication || existingApplication.userId !== session.user.id) {
-      throw new Error('Application not found or unauthorized')
+    if (
+      !existingApplication ||
+      existingApplication.userId !== session.user.id
+    ) {
+      throw new Error('Application not found or unauthorized');
     }
 
     const application = await db.application.update({
@@ -63,71 +75,82 @@ export async function updateApplication(id: string, data: ApplicationUpdateData)
         ...validatedData,
         updatedAt: new Date(),
       },
-    })
+    });
 
-    revalidatePath('/dashboard/applications')
-    revalidatePath(`/dashboard/applications/${id}`)
-    
-    return { success: true, application }
+    revalidatePath('/dashboard/applications');
+    revalidatePath(`/dashboard/applications/${id}`);
+
+    return { success: true, application };
   } catch (error) {
-    console.error('Error updating application:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to update application' 
-    }
+    console.error('Error updating application:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to update application',
+    };
   }
 }
 
 export async function deleteApplication(id: string) {
   try {
-    const session = await auth()
-    
+    const session = await auth();
+
     if (!session?.user?.id) {
-      throw new Error('Unauthorized')
+      throw new Error('Unauthorized');
     }
 
     // Verify the application belongs to the user
     const existingApplication = await db.application.findUnique({
       where: { id },
-      select: { userId: true }
-    })
+      select: { userId: true },
+    });
 
-    if (!existingApplication || existingApplication.userId !== session.user.id) {
-      throw new Error('Application not found or unauthorized')
+    if (
+      !existingApplication ||
+      existingApplication.userId !== session.user.id
+    ) {
+      throw new Error('Application not found or unauthorized');
     }
 
     await db.application.delete({
       where: { id },
-    })
+    });
 
-    revalidatePath('/dashboard/applications')
-    
-    return { success: true }
+    revalidatePath('/dashboard/applications');
+
+    return { success: true };
   } catch (error) {
-    console.error('Error deleting application:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to delete application' 
-    }
+    console.error('Error deleting application:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to delete application',
+    };
   }
 }
 
-export async function updateApplicationStatus(id: string, status: ApplicationStatus) {
+export async function updateApplicationStatus(
+  id: string,
+  status: ApplicationStatus
+) {
   try {
-    const session = await auth()
-    
+    const session = await auth();
+
     if (!session?.user?.id) {
-      throw new Error('Unauthorized')
+      throw new Error('Unauthorized');
     }
 
     // Verify the application belongs to the user
     const existingApplication = await db.application.findUnique({
       where: { id },
-      select: { userId: true }
-    })
+      select: { userId: true },
+    });
 
-    if (!existingApplication || existingApplication.userId !== session.user.id) {
-      throw new Error('Application not found or unauthorized')
+    if (
+      !existingApplication ||
+      existingApplication.userId !== session.user.id
+    ) {
+      throw new Error('Application not found or unauthorized');
     }
 
     const application = await db.application.update({
@@ -136,29 +159,31 @@ export async function updateApplicationStatus(id: string, status: ApplicationSta
         status,
         updatedAt: new Date(),
         // Set appliedDate when status changes to APPLIED
-        ...(status === ApplicationStatus.APPLIED && { appliedDate: new Date() }),
+        ...(status === ApplicationStatus.APPLIED && {
+          appliedDate: new Date(),
+        }),
       },
-    })
+    });
 
-    revalidatePath('/dashboard/applications')
-    revalidatePath(`/dashboard/applications/${id}`)
-    
-    return { success: true, application }
+    revalidatePath('/dashboard/applications');
+    revalidatePath(`/dashboard/applications/${id}`);
+
+    return { success: true, application };
   } catch (error) {
-    console.error('Error updating application status:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to update status' 
-    }
+    console.error('Error updating application status:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update status',
+    };
   }
 }
 
 export async function getApplications() {
   try {
-    const session = await auth()
-    
+    const session = await auth();
+
     if (!session?.user?.id) {
-      throw new Error('Unauthorized')
+      throw new Error('Unauthorized');
     }
 
     const applications = await db.application.findMany({
@@ -176,25 +201,26 @@ export async function getApplications() {
           },
         },
       },
-    })
+    });
 
-    return { success: true, applications }
+    return { success: true, applications };
   } catch (error) {
-    console.error('Error fetching applications:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to fetch applications',
-      applications: []
-    }
+    console.error('Error fetching applications:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to fetch applications',
+      applications: [],
+    };
   }
 }
 
 export async function getApplication(id: string) {
   try {
-    const session = await auth()
-    
+    const session = await auth();
+
     if (!session?.user?.id) {
-      throw new Error('Unauthorized')
+      throw new Error('Unauthorized');
     }
 
     const application = await db.application.findUnique({
@@ -207,19 +233,20 @@ export async function getApplication(id: string) {
           },
         },
       },
-    })
+    });
 
     if (!application || application.userId !== session.user.id) {
-      throw new Error('Application not found or unauthorized')
+      throw new Error('Application not found or unauthorized');
     }
 
-    return { success: true, application }
+    return { success: true, application };
   } catch (error) {
-    console.error('Error fetching application:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to fetch application',
-      application: null
-    }
+    console.error('Error fetching application:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to fetch application',
+      application: null,
+    };
   }
 }

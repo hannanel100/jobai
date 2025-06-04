@@ -7,7 +7,7 @@ async function testAIAnalysis() {
   try {
     // Create or find the development user
     let user = await prisma.user.findUnique({
-      where: { email: 'dev@test.com' }
+      where: { email: 'dev@test.com' },
     });
 
     if (!user) {
@@ -18,8 +18,8 @@ async function testAIAnalysis() {
           email: 'dev@test.com',
           firstName: 'Dev',
           lastName: 'User',
-          password: hashedPassword
-        }
+          password: hashedPassword,
+        },
       });
       console.log('Development user created:', user.email);
     } else {
@@ -31,15 +31,15 @@ async function testAIAnalysis() {
       where: {
         userId: user.id,
         content: {
-          not: null
-        }
+          not: null,
+        },
       },
-      take: 1
+      take: 1,
     });
 
     if (resumes.length === 0) {
       console.log('No resumes with content found. Creating a test resume...');
-      
+
       // Create a test resume with sample content
       const testResume = await prisma.resume.create({
         data: {
@@ -82,16 +82,16 @@ CERTIFICATIONS
             metadata: {
               pages: 1,
               wordCount: 180,
-              extractedAt: new Date().toISOString()
+              extractedAt: new Date().toISOString(),
             },
             wordCount: 180,
-            extractedAt: new Date().toISOString()
-          }
-        }
+            extractedAt: new Date().toISOString(),
+          },
+        },
       });
 
       console.log('Created test resume:', testResume.title);
-      
+
       // Now we can test the AI analysis
       console.log('\nTo test AI analysis:');
       console.log('1. Go to http://localhost:3001/dashboard/resumes');
@@ -100,13 +100,14 @@ CERTIFICATIONS
       console.log('4. Click "Analyze Resume" to test comprehensive analysis');
       console.log('5. Try job matching by entering a job description');
       console.log('6. Test optimization suggestions');
-      
     } else {
       const resume = resumes[0];
       console.log('Found resume with content:', resume.title);
       console.log('Resume ID:', resume.id);
       console.log('\nTo test AI analysis:');
-      console.log(`1. Go to http://localhost:3001/dashboard/resumes/${resume.id}`);
+      console.log(
+        `1. Go to http://localhost:3001/dashboard/resumes/${resume.id}`
+      );
       console.log('2. Go to the "AI Analysis" tab');
       console.log('3. Click "Analyze Resume" to test comprehensive analysis');
       console.log('4. Try job matching by entering a job description');
@@ -116,23 +117,24 @@ CERTIFICATIONS
     // Check existing analyses
     const analyses = await prisma.resumeAnalysis.findMany({
       where: {
-        userId: user.id
+        userId: user.id,
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
-      take: 5
+      take: 5,
     });
 
     if (analyses.length > 0) {
       console.log('\nExisting analyses:');
       analyses.forEach((analysis, index) => {
-        console.log(`${index + 1}. ${analysis.type} - Score: ${analysis.score || 'N/A'} - ${analysis.createdAt}`);
+        console.log(
+          `${index + 1}. ${analysis.type} - Score: ${analysis.score || 'N/A'} - ${analysis.createdAt}`
+        );
       });
     } else {
       console.log('\nNo existing analyses found.');
     }
-
   } catch (error) {
     console.error('Error:', error);
   } finally {

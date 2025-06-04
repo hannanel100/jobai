@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { login } from '@/actions/auth'
-import { Button } from '@/components/ui/button'
+import { login } from '@/actions/auth';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -9,7 +9,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -17,20 +17,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { LoginSchema } from '@/schemas/auth'
-import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
-import { useState, useTransition } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { LoginSchema } from '@/schemas/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
+import { useState, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-type LoginFormValues = z.infer<typeof LoginSchema>
+type LoginFormValues = z.infer<typeof LoginSchema>;
 
 export default function LoginForm() {
-  const [error, setError] = useState<string | undefined>('')
-  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | undefined>('');
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
@@ -38,27 +38,25 @@ export default function LoginForm() {
       email: '',
       password: '',
     },
-  })
+  });
 
   const onSubmit = (values: LoginFormValues) => {
-    setError('')
-    
+    setError('');
+
     startTransition(() => {
-      login(values).then((data) => {
+      login(values).then(data => {
         if (data?.error) {
-          setError(data.error)
+          setError(data.error);
         }
-      })
-    })
-  }
+      });
+    });
+  };
 
   return (
     <Card className="w-[400px]">
       <CardHeader>
         <CardTitle>Welcome back</CardTitle>
-        <CardDescription>
-          Sign in to your account to continue
-        </CardDescription>
+        <CardDescription>Sign in to your account to continue</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -121,5 +119,5 @@ export default function LoginForm() {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

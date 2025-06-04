@@ -1,26 +1,28 @@
-import { auth } from '@/auth'
-import { redirect } from 'next/navigation'
-import { getApplication } from '@/actions/applications'
-import { EditApplicationForm } from '@/components/applications/edit-application-form'
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import { getApplication } from '@/actions/applications';
+import { EditApplicationForm } from '@/components/applications/edit-application-form';
 
 interface EditApplicationPageProps {
   params: Promise<{
-    id: string
-  }>
+    id: string;
+  }>;
 }
 
-export default async function EditApplicationPage({ params }: EditApplicationPageProps) {
-  const session = await auth()
+export default async function EditApplicationPage({
+  params,
+}: EditApplicationPageProps) {
+  const session = await auth();
 
   if (!session) {
-    redirect('/auth/login')
+    redirect('/auth/login');
   }
 
-  const { id } = await params
-  const result = await getApplication(id)
+  const { id } = await params;
+  const result = await getApplication(id);
 
   if (!result.success || !result.application) {
-    redirect('/dashboard/applications')
+    redirect('/dashboard/applications');
   }
 
   return (
@@ -34,5 +36,5 @@ export default async function EditApplicationPage({ params }: EditApplicationPag
 
       <EditApplicationForm application={result.application} />
     </div>
-  )
+  );
 }

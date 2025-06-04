@@ -26,11 +26,11 @@ export async function parseResumeContent(
     switch (fileType) {
       case 'application/pdf':
         return await parsePdf(buffer);
-      
+
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
       case 'application/msword':
         return await parseDocx(buffer);
-      
+
       default:
         throw new Error(`Unsupported file type: ${fileType}`);
     }
@@ -46,7 +46,7 @@ export async function parseResumeContent(
 async function parsePdf(buffer: Buffer): Promise<ParsedResumeContent> {
   try {
     const data = await pdf(buffer);
-      return {
+    return {
       text: data.text.trim(),
       metadata: {
         pages: data.numpages,
@@ -55,8 +55,14 @@ async function parsePdf(buffer: Buffer): Promise<ParsedResumeContent> {
         subject: data.info?.Subject,
         creator: data.info?.Creator,
         producer: data.info?.Producer,
-        creationDate: data.info?.CreationDate && data.info.CreationDate !== null ? new Date(data.info.CreationDate) : undefined,
-        modificationDate: data.info?.ModDate && data.info.ModDate !== null ? new Date(data.info.ModDate) : undefined,
+        creationDate:
+          data.info?.CreationDate && data.info.CreationDate !== null
+            ? new Date(data.info.CreationDate)
+            : undefined,
+        modificationDate:
+          data.info?.ModDate && data.info.ModDate !== null
+            ? new Date(data.info.ModDate)
+            : undefined,
       },
     };
   } catch (error) {
@@ -71,7 +77,7 @@ async function parsePdf(buffer: Buffer): Promise<ParsedResumeContent> {
 async function parseDocx(buffer: Buffer): Promise<ParsedResumeContent> {
   try {
     const result = await mammoth.extractRawText({ buffer });
-    
+
     return {
       text: result.value.trim(),
       metadata: {
@@ -89,13 +95,15 @@ async function parseDocx(buffer: Buffer): Promise<ParsedResumeContent> {
  * Clean and normalize extracted text content
  */
 export function cleanResumeText(text: string): string {
-  return text
-    // Remove excessive whitespace
-    .replace(/\s+/g, ' ')
-    // Remove multiple line breaks
-    .replace(/\n\s*\n/g, '\n\n')
-    // Trim whitespace
-    .trim();
+  return (
+    text
+      // Remove excessive whitespace
+      .replace(/\s+/g, ' ')
+      // Remove multiple line breaks
+      .replace(/\n\s*\n/g, '\n\n')
+      // Trim whitespace
+      .trim()
+  );
 }
 
 /**
@@ -106,17 +114,31 @@ export function validateResumeContent(text: string): boolean {
   if (text.length < 50) {
     return false;
   }
-  
+
   // Should contain some common resume keywords
   const resumeKeywords = [
-    'experience', 'education', 'skills', 'work', 'employment',
-    'university', 'college', 'degree', 'job', 'position',
-    'email', 'phone', 'contact', 'address', 'linkedin'
+    'experience',
+    'education',
+    'skills',
+    'work',
+    'employment',
+    'university',
+    'college',
+    'degree',
+    'job',
+    'position',
+    'email',
+    'phone',
+    'contact',
+    'address',
+    'linkedin',
   ];
-  
+
   const lowerText = text.toLowerCase();
-  const foundKeywords = resumeKeywords.filter(keyword => lowerText.includes(keyword));
-  
+  const foundKeywords = resumeKeywords.filter(keyword =>
+    lowerText.includes(keyword)
+  );
+
   // Should contain at least 2 resume-related keywords
   return foundKeywords.length >= 2;
 }

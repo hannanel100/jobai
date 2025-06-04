@@ -1,23 +1,39 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
-import { applicationSchema, ApplicationFormData } from '@/schemas/application'
-import { createApplication } from '@/actions/applications'
-import { useResumes } from '@/hooks/use-resumes'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ApplicationSource } from '@prisma/client'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CalendarIcon } from 'lucide-react'
-import { format } from 'date-fns'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { applicationSchema, ApplicationFormData } from '@/schemas/application';
+import { createApplication } from '@/actions/applications';
+import { useResumes } from '@/hooks/use-resumes';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ApplicationSource } from '@prisma/client';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 
 const applicationSourceOptions = [
   { value: ApplicationSource.LINKEDIN, label: 'LinkedIn' },
@@ -28,15 +44,19 @@ const applicationSourceOptions = [
   { value: ApplicationSource.JOB_BOARD, label: 'Job Board' },
   { value: ApplicationSource.NETWORKING_EVENT, label: 'Networking Event' },
   { value: ApplicationSource.OTHER, label: 'Other' },
-]
+];
 
 export function ApplicationForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
   // Use React Query hook for resumes
-  const { data: resumes = [], isLoading: loadingResumes, error: resumesError } = useResumes()
+  const {
+    data: resumes = [],
+    isLoading: loadingResumes,
+    error: resumesError,
+  } = useResumes();
 
   const {
     register,
@@ -49,29 +69,30 @@ export function ApplicationForm() {
     defaultValues: {
       currency: 'USD',
     },
-  })
+  });
 
-  const applicationDeadline = watch('applicationDeadline')
-  const followUpDate = watch('followUpDate')
+  const applicationDeadline = watch('applicationDeadline');
+  const followUpDate = watch('followUpDate');
 
   const onSubmit = async (data: ApplicationFormData) => {
-    setIsLoading(true)
-    setError('')
+    setIsLoading(true);
+    setError('');
 
     try {
-      const result = await createApplication(data)
+      const result = await createApplication(data);
 
       if (result.success) {
-        router.push('/dashboard/applications')
-        router.refresh()      } else {
-        setError(result.error || 'Failed to create application')
+        router.push('/dashboard/applications');
+        router.refresh();
+      } else {
+        setError(result.error || 'Failed to create application');
       }
     } catch {
-      setError('An unexpected error occurred')
+      setError('An unexpected error occurred');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="max-w-2xl">
@@ -88,7 +109,6 @@ export function ApplicationForm() {
               {error}
             </div>
           )}
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="companyName">Company Name *</Label>
@@ -98,7 +118,9 @@ export function ApplicationForm() {
                 placeholder="e.g. Google, Microsoft"
               />
               {errors.companyName && (
-                <p className="text-sm text-red-500">{errors.companyName.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.companyName.message}
+                </p>
               )}
             </div>
 
@@ -110,10 +132,13 @@ export function ApplicationForm() {
                 placeholder="e.g. Software Engineer, Product Manager"
               />
               {errors.positionTitle && (
-                <p className="text-sm text-red-500">{errors.positionTitle.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.positionTitle.message}
+                </p>
               )}
             </div>
-          </div>          <div className="space-y-2">
+          </div>{' '}
+          <div className="space-y-2">
             <Label htmlFor="jobDescription">Job Description *</Label>
             <Textarea
               id="jobDescription"
@@ -122,23 +147,37 @@ export function ApplicationForm() {
               rows={6}
             />
             {errors.jobDescription && (
-              <p className="text-sm text-red-500">{errors.jobDescription.message}</p>
+              <p className="text-sm text-red-500">
+                {errors.jobDescription.message}
+              </p>
             )}
-          </div>          <div className="space-y-2">
+          </div>{' '}
+          <div className="space-y-2">
             <Label htmlFor="resumeId">Resume to Use</Label>
-            <Select onValueChange={(value) => setValue('resumeId', value === 'none' ? null : value)}>
+            <Select
+              onValueChange={value =>
+                setValue('resumeId', value === 'none' ? null : value)
+              }
+            >
               <SelectTrigger>
-                <SelectValue placeholder={loadingResumes ? "Loading resumes..." : "Select a resume (optional)"} />
+                <SelectValue
+                  placeholder={
+                    loadingResumes
+                      ? 'Loading resumes...'
+                      : 'Select a resume (optional)'
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No resume selected</SelectItem>
-                {resumes.map((resume) => (
+                {resumes.map(resume => (
                   <SelectItem key={resume.id} value={resume.id}>
                     <div className="flex flex-col">
                       <span className="font-medium">{resume.title}</span>
                       <span className="text-xs text-gray-500">
-                        {resume.fileName} • Used in {resume._count.applications} applications
-                        {resume.isBase && " • Base template"}
+                        {resume.fileName} • Used in {resume._count.applications}{' '}
+                        applications
+                        {resume.isBase && ' • Base template'}
                       </span>
                     </div>
                   </SelectItem>
@@ -152,11 +191,16 @@ export function ApplicationForm() {
             )}
             {resumes.length === 0 && !loadingResumes && !resumesError && (
               <p className="text-sm text-gray-500">
-                No resumes available. <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => router.push('/dashboard/resumes')}>Upload a resume first</span>
+                No resumes available.{' '}
+                <span
+                  className="text-blue-600 cursor-pointer hover:underline"
+                  onClick={() => router.push('/dashboard/resumes')}
+                >
+                  Upload a resume first
+                </span>
               </p>
             )}
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="companyWebsite">Company Website</Label>
@@ -167,18 +211,24 @@ export function ApplicationForm() {
                 type="url"
               />
               {errors.companyWebsite && (
-                <p className="text-sm text-red-500">{errors.companyWebsite.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.companyWebsite.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="applicationSource">Application Source</Label>
-              <Select onValueChange={(value) => setValue('applicationSource', value as ApplicationSource)}>
+              <Select
+                onValueChange={value =>
+                  setValue('applicationSource', value as ApplicationSource)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Where did you find this job?" />
                 </SelectTrigger>
                 <SelectContent>
-                  {applicationSourceOptions.map((option) => (
+                  {applicationSourceOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -187,22 +237,23 @@ export function ApplicationForm() {
               </Select>
             </div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="salaryMin">Min Salary</Label>
               <Input
                 id="salaryMin"
-                {...register('salaryMin', { 
+                {...register('salaryMin', {
                   valueAsNumber: true,
-                  setValueAs: (v) => v === '' ? null : Number(v) || null
+                  setValueAs: v => (v === '' ? null : Number(v) || null),
                 })}
                 type="number"
                 placeholder="50000"
                 min="0"
               />
               {errors.salaryMin && (
-                <p className="text-sm text-red-500">{errors.salaryMin.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.salaryMin.message}
+                </p>
               )}
             </div>
 
@@ -210,25 +261,36 @@ export function ApplicationForm() {
               <Label htmlFor="salaryMax">Max Salary</Label>
               <Input
                 id="salaryMax"
-                {...register('salaryMax', { 
+                {...register('salaryMax', {
                   valueAsNumber: true,
-                  setValueAs: (v) => v === '' ? null : Number(v) || null
+                  setValueAs: v => (v === '' ? null : Number(v) || null),
                 })}
                 type="number"
                 placeholder="80000"
                 min="0"
               />
               {errors.salaryMax && (
-                <p className="text-sm text-red-500">{errors.salaryMax.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.salaryMax.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="currency">Currency</Label>
-              <Select onValueChange={(value) => setValue('currency', value as 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'ILS')} defaultValue="USD">
+              <Select
+                onValueChange={value =>
+                  setValue(
+                    'currency',
+                    value as 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'ILS'
+                  )
+                }
+                defaultValue="USD"
+              >
                 <SelectTrigger>
                   <SelectValue />
-                </SelectTrigger>                <SelectContent>
+                </SelectTrigger>{' '}
+                <SelectContent>
                   <SelectItem value="USD">USD</SelectItem>
                   <SelectItem value="EUR">EUR</SelectItem>
                   <SelectItem value="GBP">GBP</SelectItem>
@@ -239,7 +301,6 @@ export function ApplicationForm() {
               </Select>
             </div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Application Deadline</Label>
@@ -250,14 +311,16 @@ export function ApplicationForm() {
                     className="w-full justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {applicationDeadline ? format(applicationDeadline, 'PPP') : 'Pick a date'}
+                    {applicationDeadline
+                      ? format(applicationDeadline, 'PPP')
+                      : 'Pick a date'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
                     selected={applicationDeadline || undefined}
-                    onSelect={(date) => setValue('applicationDeadline', date)}
+                    onSelect={date => setValue('applicationDeadline', date)}
                     initialFocus
                   />
                 </PopoverContent>
@@ -280,14 +343,13 @@ export function ApplicationForm() {
                   <Calendar
                     mode="single"
                     selected={followUpDate || undefined}
-                    onSelect={(date) => setValue('followUpDate', date)}
+                    onSelect={date => setValue('followUpDate', date)}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
             </div>
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
             <Textarea
@@ -300,7 +362,6 @@ export function ApplicationForm() {
               <p className="text-sm text-red-500">{errors.notes.message}</p>
             )}
           </div>
-
           <div className="flex gap-4">
             <Button
               type="button"
@@ -317,5 +378,5 @@ export function ApplicationForm() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

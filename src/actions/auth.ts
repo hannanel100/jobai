@@ -1,60 +1,60 @@
-'use server'
+'use server';
 
-import { signIn, signOut } from '@/auth'
-import { db } from '@/lib/db'
-import { LoginSchema, RegisterSchema } from '@/schemas/auth'
-import bcrypt from 'bcryptjs'
-import { AuthError } from 'next-auth'
-import { z } from 'zod'
+import { signIn, signOut } from '@/auth';
+import { db } from '@/lib/db';
+import { LoginSchema, RegisterSchema } from '@/schemas/auth';
+import bcrypt from 'bcryptjs';
+import { AuthError } from 'next-auth';
+import { z } from 'zod';
 
 export async function login(values: z.infer<typeof LoginSchema>) {
-  const validatedFields = LoginSchema.safeParse(values)
+  const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) {
-    return { error: 'Invalid fields!' }
+    return { error: 'Invalid fields!' };
   }
 
-  const { email, password } = validatedFields.data
+  const { email, password } = validatedFields.data;
 
   try {
     await signIn('credentials', {
       email,
       password,
       redirectTo: '/dashboard',
-    })
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          return { error: 'Invalid credentials!' }
+          return { error: 'Invalid credentials!' };
         default:
-          return { error: 'Something went wrong!' }
+          return { error: 'Something went wrong!' };
       }
     }
-    throw error
+    throw error;
   }
 }
 
 export async function register(values: z.infer<typeof RegisterSchema>) {
-  const validatedFields = RegisterSchema.safeParse(values)
+  const validatedFields = RegisterSchema.safeParse(values);
 
   if (!validatedFields.success) {
-    return { error: 'Invalid fields!' }
+    return { error: 'Invalid fields!' };
   }
-  const { email, password, firstName, lastName } = validatedFields.data
+  const { email, password, firstName, lastName } = validatedFields.data;
 
   try {
     // Check if user already exists
     const existingUser = await db.user.findUnique({
-      where: { email }
-    })
+      where: { email },
+    });
 
     if (existingUser) {
-      return { error: 'Email already in use!' }
+      return { error: 'Email already in use!' };
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create user
     await db.user.create({
@@ -63,16 +63,16 @@ export async function register(values: z.infer<typeof RegisterSchema>) {
         lastName,
         email,
         password: hashedPassword,
-      }
-    })
+      },
+    });
 
-    return { success: 'User created successfully!' }
+    return { success: 'User created successfully!' };
   } catch (error) {
-    console.error('Registration error:', error)
-    return { error: 'Something went wrong!' }
+    console.error('Registration error:', error);
+    return { error: 'Something went wrong!' };
   }
 }
 
 export async function logout() {
-  await signOut({ redirectTo: '/' })
+  await signOut({ redirectTo: '/' });
 }

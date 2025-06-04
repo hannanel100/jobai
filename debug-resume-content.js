@@ -13,9 +13,9 @@ async function debugResumeContent() {
         createdAt: true,
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
-      take: 5
+      take: 5,
     });
 
     console.log('Recent resumes:');
@@ -28,7 +28,6 @@ async function debugResumeContent() {
       console.log('Content:', JSON.stringify(resume.content, null, 2));
       console.log('Created:', resume.createdAt);
     });
-
   } catch (error) {
     console.error('Error:', error);
   } finally {

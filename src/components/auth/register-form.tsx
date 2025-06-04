@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { register } from '@/actions/auth'
-import { Button } from '@/components/ui/button'
+import { register } from '@/actions/auth';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -9,7 +9,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -17,21 +17,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { RegisterSchema } from '@/schemas/auth'
-import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
-import { useState, useTransition } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { RegisterSchema } from '@/schemas/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
+import { useState, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-type RegisterFormValues = z.infer<typeof RegisterSchema>
+type RegisterFormValues = z.infer<typeof RegisterSchema>;
 
 export default function RegisterForm() {
-  const [error, setError] = useState<string | undefined>('')
-  const [success, setSuccess] = useState<string | undefined>('')
-  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | undefined>('');
+  const [success, setSuccess] = useState<string | undefined>('');
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(RegisterSchema),
@@ -41,23 +41,23 @@ export default function RegisterForm() {
       firstName: '',
       lastName: '',
     },
-  })
+  });
 
   const onSubmit = (values: RegisterFormValues) => {
-    setError('')
-    setSuccess('')
-    
+    setError('');
+    setSuccess('');
+
     startTransition(() => {
-      register(values).then((data) => {
+      register(values).then(data => {
         if (data?.error) {
-          setError(data.error)
+          setError(data.error);
         } else if (data?.success) {
-          setSuccess(data.success)
-          form.reset()
+          setSuccess(data.success);
+          form.reset();
         }
-      })
-    })
-  }
+      });
+    });
+  };
 
   return (
     <Card className="w-[400px]">
@@ -69,7 +69,9 @@ export default function RegisterForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">            <div className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {' '}
+            <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="firstName"
@@ -166,5 +168,5 @@ export default function RegisterForm() {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

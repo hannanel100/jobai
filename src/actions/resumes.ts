@@ -1,10 +1,10 @@
-'use server'
+'use server';
 
-import { auth } from '@/auth'
-import { getDevSession } from '@/lib/dev-auth'
-import { db } from '@/lib/db'
-import { revalidatePath } from 'next/cache'
-import { z } from 'zod'
+import { auth } from '@/auth';
+import { getDevSession } from '@/lib/dev-auth';
+import { db } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
 // Resume creation schema
 const createResumeSchema = z.object({
@@ -15,43 +15,47 @@ const createResumeSchema = z.object({
   fileType: z.string().min(1, 'File type is required'),
   content: z.any().optional(), // Optional parsed content
   isBase: z.boolean().default(false),
-})
+});
 
-export type CreateResumeData = z.infer<typeof createResumeSchema>
+export type CreateResumeData = z.infer<typeof createResumeSchema>;
 
 export async function createResume(data: CreateResumeData) {
   try {
-    const session = await auth()
-    
+    const session = await auth();
+
     if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' }
-    }    const validatedData = createResumeSchema.parse(data)
+      return { success: false, error: 'Unauthorized' };
+    }
+    const validatedData = createResumeSchema.parse(data);
 
     const resume = await db.resume.create({
       data: {
         ...validatedData,
         userId: session.user.id,
-      },    })
+      },
+    });
 
-    revalidatePath('/dashboard/resumes')
-    return { success: true, resume }
+    revalidatePath('/dashboard/resumes');
+    return { success: true, resume };
   } catch (error) {
     return {
-      success: false, 
-      error: error instanceof z.ZodError 
-        ? error.errors[0].message 
-        : 'Failed to create resume' 
-    }
+      success: false,
+      error:
+        error instanceof z.ZodError
+          ? error.errors[0].message
+          : 'Failed to create resume',
+    };
   }
 }
 
 export async function getResumes() {
   try {
-    const session = await getDevSession()
-    
+    const session = await getDevSession();
+
     if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' }
-    }const resumes = await db.resume.findMany({
+      return { success: false, error: 'Unauthorized' };
+    }
+    const resumes = await db.resume.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -74,25 +78,25 @@ export async function getResumes() {
           take: 3, // Show only the latest 3 applications
         },
       },
-    })
+    });
 
-    return { success: true, resumes }
+    return { success: true, resumes };
   } catch (error) {
-    console.error('Failed to fetch resumes:', error)
-    return { success: false, error: 'Failed to fetch resumes' }
+    console.error('Failed to fetch resumes:', error);
+    return { success: false, error: 'Failed to fetch resumes' };
   }
 }
 
 export async function getResume(id: string) {
   try {
-    const session = await getDevSession()
-    
+    const session = await getDevSession();
+
     if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' }
+      return { success: false, error: 'Unauthorized' };
     }
 
     const resume = await db.resume.findFirst({
-      where: { 
+      where: {
         id,
         userId: session.user.id,
       },
@@ -107,81 +111,84 @@ export async function getResume(id: string) {
           },
         },
       },
-    })
+    });
 
     if (!resume) {
-      return { success: false, error: 'Resume not found' }
+      return { success: false, error: 'Resume not found' };
     }
 
-    return { success: true, resume }
+    return { success: true, resume };
   } catch (error) {
-    console.error('Failed to fetch resume:', error)
-    return { success: false, error: 'Failed to fetch resume' }
+    console.error('Failed to fetch resume:', error);
+    return { success: false, error: 'Failed to fetch resume' };
   }
 }
 
-export async function updateResume(id: string, data: Partial<CreateResumeData>) {
+export async function updateResume(
+  id: string,
+  data: Partial<CreateResumeData>
+) {
   try {
-    const session = await auth()
-    
+    const session = await auth();
+
     if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' }
+      return { success: false, error: 'Unauthorized' };
     }
 
     // Check if resume belongs to user
     const existingResume = await db.resume.findFirst({
-      where: { 
+      where: {
         id,
         userId: session.user.id,
       },
-    })
+    });
 
     if (!existingResume) {
-      return { success: false, error: 'Resume not found' }
+      return { success: false, error: 'Resume not found' };
     }
 
     const resume = await db.resume.update({
       where: { id },
       data,
-    })
+    });
 
-    revalidatePath('/dashboard/resumes')
-    revalidatePath(`/dashboard/resumes/${id}`)
-    return { success: true, resume }
+    revalidatePath('/dashboard/resumes');
+    revalidatePath(`/dashboard/resumes/${id}`);
+    return { success: true, resume };
   } catch (error) {
-    console.error('Failed to update resume:', error)
-    return { success: false, error: 'Failed to update resume' }
+    console.error('Failed to update resume:', error);
+    return { success: false, error: 'Failed to update resume' };
   }
 }
 
 export async function deleteResume(id: string) {
   try {
-    const session = await auth()
-    
+    const session = await auth();
+
     if (!session?.user?.id) {
-      return { success: false, error: 'Unauthorized' }
+      return { success: false, error: 'Unauthorized' };
     }
 
     // Check if resume belongs to user
     const existingResume = await db.resume.findFirst({
-      where: { 
+      where: {
         id,
         userId: session.user.id,
       },
-    })
+    });
 
     if (!existingResume) {
-      return { success: false, error: 'Resume not found' }
+      return { success: false, error: 'Resume not found' };
     }
 
     await db.resume.delete({
       where: { id },
-    })
+    });
 
-    revalidatePath('/dashboard/resumes')
-    return { success: true }
+    revalidatePath('/dashboard/resumes');
+    return { success: true };
   } catch (error) {
-    console.error('Failed to delete resume:', error)
-    return { success: false, error: 'Failed to delete resume' }
+    console.error('Failed to delete resume:', error);
+    return { success: false, error: 'Failed to delete resume' };
   }
 }
