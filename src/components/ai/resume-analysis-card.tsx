@@ -19,7 +19,10 @@ import {
   FileCheck,
   Users,
   Briefcase,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
+import { useState } from 'react';
 import { ResumeAnalysis, AnalysisType } from '@prisma/client';
 
 interface ResumeAnalysisCardProps {
@@ -51,6 +54,8 @@ export function ResumeAnalysisCard({
   analysis,
   onOptimize,
 }: ResumeAnalysisCardProps) {
+  const [showAllSuggestions, setShowAllSuggestions] = useState(false);
+
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -129,35 +134,39 @@ export function ResumeAnalysisCard({
               </CardDescription>
             </div>
           </div>{' '}
-          {analysis.score !== null && analysis.score !== undefined && (
-            <div className="text-right">
-              <div
-                className={`text-2xl font-bold ${getScoreColor(analysis.score)}`}
-              >
-                {Math.round(analysis.score)}/100
+          {analysis.score !== null &&
+            analysis.score !== undefined &&
+            analysis.type !== 'OPTIMIZATION' && (
+              <div className="text-right">
+                <div
+                  className={`text-2xl font-bold ${getScoreColor(analysis.score)}`}
+                >
+                  {Math.round(analysis.score)}/100
+                </div>
+                <div className="text-sm text-gray-500">
+                  {getScoreLabel(analysis.score)}
+                </div>
               </div>
-              <div className="text-sm text-gray-500">
-                {getScoreLabel(analysis.score)}
-              </div>
-            </div>
-          )}
+            )}
         </div>
       </CardHeader>
 
       <CardContent className="space-y-6">
         {' '}
         {/* Overall Score Progress */}
-        {analysis.score !== null && analysis.score !== undefined && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Overall Score</span>
-              <span className={getScoreColor(analysis.score)}>
-                {Math.round(analysis.score)}%
-              </span>
+        {analysis.score !== null &&
+          analysis.score !== undefined &&
+          analysis.type !== 'OPTIMIZATION' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">Overall Score</span>
+                <span className={getScoreColor(analysis.score)}>
+                  {Math.round(analysis.score)}%
+                </span>
+              </div>
+              <Progress value={analysis.score} className="h-2" />
             </div>
-            <Progress value={analysis.score} className="h-2" />
-          </div>
-        )}
+          )}
         {/* Section Breakdown */}
         {analysis.sections && (
           <div className="space-y-4">
@@ -268,7 +277,7 @@ export function ResumeAnalysisCard({
                     description: string;
                   }>
                 )
-                  .slice(0, 5)
+                  .slice(0, showAllSuggestions ? undefined : 5)
                   .map((suggestion, index) => (
                     <div
                       key={index}
@@ -289,11 +298,29 @@ export function ResumeAnalysisCard({
                         {suggestion.description}
                       </p>
                     </div>
-                  ))}{' '}
+                  ))}
+
                 {analysis.suggestions && analysis.suggestions.length > 5 && (
-                  <p className="text-xs text-gray-500 text-center">
-                    +{analysis.suggestions.length - 5} more suggestions
-                  </p>
+                  <div className="text-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAllSuggestions(!showAllSuggestions)}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      {showAllSuggestions ? (
+                        <>
+                          <ChevronUp className="h-4 w-4 mr-1" />
+                          Show Less
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-4 w-4 mr-1" />+
+                          {analysis.suggestions.length - 5} more suggestions
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
