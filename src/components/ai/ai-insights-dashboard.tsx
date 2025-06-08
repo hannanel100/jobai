@@ -69,15 +69,20 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
         // Process analyses
         if (analysesResult.success && analysesResult.analyses) {
           setRecentAnalyses(analysesResult.analyses);
+
+          // Filter analyses that have actual scores for average calculation
+          // (Optimization analyses don't have scores since they provide qualitative suggestions)
+          const scoredAnalyses = analysesResult.analyses.filter(
+            a => a.score !== null && a.score !== undefined
+          );
+
           setStats({
             totalAnalyses: analysesResult.analyses.length,
             averageScore:
-              analysesResult.analyses.length > 0
+              scoredAnalyses.length > 0
                 ? Math.round(
-                    analysesResult.analyses.reduce(
-                      (sum, a) => sum + (a.score || 0),
-                      0
-                    ) / analysesResult.analyses.length
+                    scoredAnalyses.reduce((sum, a) => sum + a.score!, 0) /
+                      scoredAnalyses.length
                   )
                 : 0,
             topScore: Math.max(
