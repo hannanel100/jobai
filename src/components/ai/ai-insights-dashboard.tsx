@@ -185,7 +185,7 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
   return (
     <div className="space-y-6">
       {/* AI Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -327,7 +327,7 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
                 insights, scores, and optimization suggestions.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-6">
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
                   <h4 className="font-medium text-sm mb-1">Resume Scoring</h4>
