@@ -23,10 +23,14 @@ export default async function Home() {
           </p>
           <div className="space-x-4">
             <Button asChild size="lg">
-              <Link href="/auth/register">Get Started</Link>
+              <Link href="/auth/register" prefetch={true}>
+                Get Started
+              </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="/auth/login">Sign In</Link>
+              <Link href="/auth/login" prefetch={true}>
+                Sign In
+              </Link>
             </Button>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -68,9 +69,6 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
     }
   };
 
-  const handleViewDetails = (id: string) => {
-    router.push(`/dashboard/resumes/${id}`);
-  };
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDownload = (fileUrl: string, _fileName: string) => {
     window.open(fileUrl, '_blank');
@@ -155,11 +153,16 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleViewDetails(resume.id)}
+                  asChild
                   className="flex items-center gap-1"
                 >
-                  <Eye className="h-4 w-4" />
-                  View Details
+                  <Link
+                    href={`/dashboard/resumes/${resume.id}`}
+                    prefetch={true}
+                  >
+                    <Eye className="h-4 w-4" />
+                    View Details
+                  </Link>
                 </Button>
                 {resume.fileUrl && (
                   <Button

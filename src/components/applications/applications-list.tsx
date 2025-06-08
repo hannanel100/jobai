@@ -260,7 +260,10 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                   </SelectContent>
                 </Select>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href={`/dashboard/applications/${application.id}/edit`}>
+                  <Link
+                    href={`/dashboard/applications/${application.id}/edit`}
+                    prefetch={true}
+                  >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </Link>

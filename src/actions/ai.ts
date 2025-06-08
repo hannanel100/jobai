@@ -1,5 +1,6 @@
 'use server';
 
+import { auth } from '@/auth';
 import { getDevSession } from '@/lib/dev-auth';
 import { db } from '@/lib/db';
 import { AIResumeService } from '@/services/ai-resume-service';
@@ -682,7 +683,7 @@ export async function getResumeAnalyses(resumeId: string) {
  */
 export async function getUserAnalyses() {
   try {
-    const session = await getDevSession();
+    const session = await auth();
 
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' };
@@ -718,7 +719,7 @@ export async function getUserAnalyses() {
 
 export async function getRateLimitStatus() {
   try {
-    const session = await getDevSession();
+    const session = await auth();
 
     if (!session?.user?.id) {
       return { success: false, error: 'Unauthorized' };

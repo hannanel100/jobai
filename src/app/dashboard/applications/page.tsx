@@ -34,7 +34,9 @@ export default async function ApplicationsPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/applications/new">Add Application</Link>
+          <Link href="/dashboard/applications/new" prefetch={true}>
+            Add Application
+          </Link>
         </Button>
       </div>
 
@@ -49,7 +51,7 @@ export default async function ApplicationsPage() {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/dashboard/applications/new">
+              <Link href="/dashboard/applications/new" prefetch={true}>
                 Add Your First Application
               </Link>
             </Button>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   applicationUpdateSchema,
   ApplicationUpdateData,
@@ -220,12 +221,13 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
             {resumes.length === 0 && !loadingResumes && !resumesError && (
               <p className="text-sm text-gray-500">
                 No resumes available.{' '}
-                <span
+                <Link
+                  href="/dashboard/resumes"
+                  prefetch={true}
                   className="text-blue-600 cursor-pointer hover:underline"
-                  onClick={() => router.push('/dashboard/resumes')}
                 >
                   Upload a resume first
-                </span>
+                </Link>
               </p>
             )}
           </div>

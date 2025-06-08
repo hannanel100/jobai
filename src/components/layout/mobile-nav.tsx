@@ -65,6 +65,7 @@ export function MobileNav() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={true}
                     onClick={closeMenu}
                     className={cn(
                       'block px-3 py-2 rounded-md text-base font-medium transition-colors',

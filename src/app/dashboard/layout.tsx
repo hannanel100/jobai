@@ -1,4 +1,4 @@
-import { getDevSession } from '@/lib/dev-auth';
+import { auth } from '@/auth';
 import { logout } from '@/actions/auth';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -10,7 +10,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getDevSession();
+  const session = await auth();
 
   if (!session) {
     redirect('/auth/login');
@@ -24,6 +24,7 @@ export default async function DashboardLayout({
             <div className="flex items-center space-x-8">
               <Link
                 href="/dashboard"
+                prefetch={true}
                 className="text-2xl font-bold text-gray-900"
               >
                 JobTracker AI
@@ -32,18 +33,21 @@ export default async function DashboardLayout({
               <nav className="hidden md:flex space-x-6">
                 <Link
                   href="/dashboard"
+                  prefetch={true}
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/dashboard/applications"
+                  prefetch={true}
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Applications
                 </Link>
                 <Link
                   href="/dashboard/resumes"
+                  prefetch={true}
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Resumes

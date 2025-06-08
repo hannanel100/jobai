@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { logout } from '@/actions/auth';
 import { getApplications } from '@/actions/applications';
+import { getUserAnalyses, getRateLimitStatus } from '@/actions/ai';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -9,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { AIInsightsDashboard } from '@/components/ai/ai-insights-dashboard';
+import { ServerAIInsightsDashboard } from '@/components/ai/server-ai-insights-dashboard';
 import { redirect } from 'next/navigation';
 import { ApplicationStatus } from '@prisma/client';
 import Link from 'next/link';
@@ -21,8 +22,20 @@ export default async function DashboardPage() {
     redirect('/auth/login');
   }
 
-  const result = await getApplications();
-  const applications = result.success ? result.applications : [];
+  // Fetch all data in parallel for better performance
+  const [applicationsResult, analysesResult, rateLimitResult] =
+    await Promise.all([
+      getApplications(),
+      getUserAnalyses(),
+      getRateLimitStatus(),
+    ]);
+
+  const applications = applicationsResult.success
+    ? applicationsResult.applications
+    : [];
+  const analyses = analysesResult.success ? analysesResult.analyses : [];
+  // Rate limit data for AI insights component
+  // const rateLimit = rateLimitResult;
   // Calculate statistics
   const totalApplications = applications.length;
   const inProgressApplications = applications.filter(
@@ -58,7 +71,6 @@ export default async function DashboardPage() {
           </Button>
         </form>
       </div>
-
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -111,7 +123,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
       {totalApplications === 0 ? (
         <Card>
           <CardHeader>
@@ -131,7 +142,7 @@ export default async function DashboardPage() {
               </ul>
             </div>
             <Button asChild>
-              <Link href="/dashboard/applications/new">
+              <Link href="/dashboard/applications/new" prefetch={true}>
                 Add Your First Application
               </Link>
             </Button>
@@ -169,7 +180,7 @@ export default async function DashboardPage() {
                 ))}
               </div>
               <Button variant="outline" className="w-full mt-4" asChild>
-                <Link href="/dashboard/applications">
+                <Link href="/dashboard/applications" prefetch={true}>
                   View All Applications
                 </Link>
               </Button>
@@ -185,25 +196,33 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <Button className="w-full" asChild>
-                <Link href="/dashboard/applications/new">
+                <Link href="/dashboard/applications/new" prefetch={true}>
                   Add New Application
                 </Link>
               </Button>
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/dashboard/resumes">Manage Resumes</Link>
+                <Link href="/dashboard/resumes" prefetch={true}>
+                  Manage Resumes
+                </Link>
               </Button>
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/dashboard/applications">
+                <Link href="/dashboard/applications" prefetch={true}>
                   View All Applications
                 </Link>
               </Button>{' '}
             </CardContent>
           </Card>
         </div>
-      )}
-
+      )}{' '}
       {/* AI Insights Section */}
-      <AIInsightsDashboard userId={session.user.id} />
+      <ServerAIInsightsDashboard
+        analyses={analyses || []}
+        rateLimit={
+          rateLimitResult.success && rateLimitResult.rateLimit
+            ? rateLimitResult.rateLimit
+            : null
+        }
+      />
     </div>
   );
 }
