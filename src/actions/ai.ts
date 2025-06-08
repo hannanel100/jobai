@@ -100,7 +100,23 @@ export async function analyzeResume(data: z.infer<typeof analyzeResumeSchema>) {
         error: 'Resume text is too short for meaningful analysis',
       };
     } // Perform AI analysis
-    const analysis = await AIResumeService.analyzeResume(resumeText);
+    let analysis;
+    try {
+      analysis = await AIResumeService.analyzeResume(resumeText);
+    } catch (aiError) {
+      console.error('AI analysis error:', aiError);
+      if (aiError instanceof Error && aiError.message.includes('JSON')) {
+        return {
+          success: false,
+          error:
+            'The analysis response was too detailed and got truncated. Please try again.',
+        };
+      }
+      return {
+        success: false,
+        error: 'Failed to analyze resume. Please try again.',
+      };
+    }
 
     // Store the analysis result
     const analysisRecord = await db.resumeAnalysis.create({
@@ -208,12 +224,28 @@ export async function matchResumeToJob(data: z.infer<typeof matchJobSchema>) {
     if (!resumeText || resumeText.trim().length < 50) {
       return { success: false, error: 'Resume text is too short for analysis' };
     } // Perform job matching analysis
-    const matchAnalysis = await AIResumeService.matchJobDescription(
-      resumeText,
-      application.jobDescription || '',
-      application.positionTitle,
-      application.companyName
-    );
+    let matchAnalysis;
+    try {
+      matchAnalysis = await AIResumeService.matchJobDescription(
+        resumeText,
+        application.jobDescription || '',
+        application.positionTitle,
+        application.companyName
+      );
+    } catch (aiError) {
+      console.error('AI job matching error:', aiError);
+      if (aiError instanceof Error && aiError.message.includes('JSON')) {
+        return {
+          success: false,
+          error:
+            'The job matching response was too detailed and got truncated. Please try again.',
+        };
+      }
+      return {
+        success: false,
+        error: 'Failed to analyze job match. Please try again.',
+      };
+    }
 
     // Store the analysis result
     const analysisRecord = await db.resumeAnalysis.create({
@@ -318,12 +350,28 @@ export async function matchResumeToJobAdHoc(
     if (!resumeText || resumeText.trim().length < 50) {
       return { success: false, error: 'Resume text is too short for analysis' };
     } // Perform job matching analysis
-    const matchAnalysis = await AIResumeService.matchJobDescription(
-      resumeText,
-      validatedData.jobDescription,
-      validatedData.jobTitle || 'Not specified',
-      validatedData.companyName || 'Not specified'
-    ); // Store the analysis result
+    let matchAnalysis;
+    try {
+      matchAnalysis = await AIResumeService.matchJobDescription(
+        resumeText,
+        validatedData.jobDescription,
+        validatedData.jobTitle || 'Not specified',
+        validatedData.companyName || 'Not specified'
+      );
+    } catch (aiError) {
+      console.error('AI job matching error:', aiError);
+      if (aiError instanceof Error && aiError.message.includes('JSON')) {
+        return {
+          success: false,
+          error:
+            'The job matching response was too detailed and got truncated. Please try again.',
+        };
+      }
+      return {
+        success: false,
+        error: 'Failed to analyze job match. Please try again.',
+      };
+    } // Store the analysis result
     const analysisRecord = await db.resumeAnalysis.create({
       data: {
         resumeId: resume.id,
@@ -425,13 +473,130 @@ export async function optimizeResume(
         error: 'Resume text is too short for optimization',
       };
     } // Perform optimization analysis
-    const optimization = await AIResumeService.optimizeResume(
-      resumeText,
-      validatedData.targetIndustry,
-      validatedData.targetRole
-    );
+    let optimization;
+    try {
+      optimization = await AIResumeService.optimizeResume(
+        resumeText,
+        validatedData.targetIndustry,
+        validatedData.targetRole
+      );
+    } catch (aiError) {
+      console.error('AI optimization error:', aiError);
+      // Check if it's a JSON parsing error (response too long)
+      if (aiError instanceof Error && aiError.message.includes('JSON')) {
+        return {
+          success: false,
+          error:
+            'The optimization response was too detailed and got truncated. Please try again or contact support if the issue persists.',
+        };
+      }
+      return {
+        success: false,
+        error: 'Failed to generate optimization suggestions. Please try again.',
+      };
+    }
 
-    // Store the analysis result
+    // Store the analysis result with proper optimization data structure
+    const suggestions: Array<{
+      category: string;
+      priority: 'high' | 'medium' | 'low';
+      title: string;
+      description: string;
+    }> = [];
+
+    // Map optimized sections to suggestions
+    if (optimization.optimizedSections?.summary) {
+      suggestions.push({
+        category: 'summary',
+        priority: 'high',
+        title: 'Professional Summary Enhancement',
+        description: optimization.optimizedSections.summary,
+      });
+    }
+
+    // Map experience improvements
+    if (optimization.optimizedSections?.experienceImprovements?.length > 0) {
+      optimization.optimizedSections.experienceImprovements.forEach(
+        (improvement, index) => {
+          if (improvement?.improvedText && improvement?.reasoning) {
+            suggestions.push({
+              category: 'experience',
+              priority: index < 2 ? 'high' : 'medium',
+              title: 'Experience Section Improvement',
+              description: `${improvement.improvedText} (${improvement.reasoning})`,
+            });
+          }
+        }
+      );
+    }
+
+    // Map keyword suggestions
+    if (optimization.keywordOptimization?.keywordPlacement?.length > 0) {
+      optimization.keywordOptimization.keywordPlacement.forEach(
+        (placement, index) => {
+          suggestions.push({
+            category: 'keywords',
+            priority: index < 3 ? 'high' : 'medium',
+            title: `Add Keyword: ${placement.keyword}`,
+            description: `${placement.context} (Suggested section: ${placement.suggestedSection})`,
+          });
+        }
+      );
+    }
+
+    // Map formatting tips
+    if (optimization.formattingTips?.length > 0) {
+      optimization.formattingTips.forEach((tip, index) => {
+        suggestions.push({
+          category: 'formatting',
+          priority: 'medium',
+          title: `Formatting Improvement ${index + 1}`,
+          description: tip,
+        });
+      });
+    }
+
+    // Map industry-specific tips
+    if (optimization.industrySpecificTips?.length > 0) {
+      optimization.industrySpecificTips.forEach((tip, index) => {
+        suggestions.push({
+          category: 'industry',
+          priority: index < 2 ? 'high' : 'low',
+          title: `Industry-Specific Tip ${index + 1}`,
+          description: tip,
+        });
+      });
+    }
+
+    // Fallback: If no suggestions were created from the structured data,
+    // create general suggestions from any available data
+    if (suggestions.length === 0) {
+      // Try to extract any available optimization data as suggestions
+      if (optimization.keywordOptimization?.suggestedKeywords?.length > 0) {
+        optimization.keywordOptimization.suggestedKeywords
+          .slice(0, 5)
+          .forEach((keyword, index) => {
+            suggestions.push({
+              category: 'keywords',
+              priority: index < 3 ? 'high' : 'medium',
+              title: `Add Keyword: ${keyword}`,
+              description: `Consider adding "${keyword}" to relevant sections of your resume for better keyword optimization.`,
+            });
+          });
+      }
+
+      // If still no suggestions, create at least one general suggestion
+      if (suggestions.length === 0) {
+        suggestions.push({
+          category: 'general',
+          priority: 'medium',
+          title: 'Resume Optimization',
+          description:
+            'Your resume has been analyzed. Consider reviewing your professional summary, experience descriptions, and skills section for potential improvements.',
+        });
+      }
+    }
+
     const analysisRecord = await db.resumeAnalysis.create({
       data: {
         resumeId: resume.id,
@@ -439,30 +604,18 @@ export async function optimizeResume(
         type: 'OPTIMIZATION',
         score: undefined, // Optimization doesn't have a numeric score
         sections: undefined,
-        keywords: undefined,
-        suggestions: Array.isArray(optimization)
-          ? optimization.map(
-              (
-                opt: string | { title?: string; description?: string },
-                index: number
-              ) => ({
-                category: 'optimization',
-                priority:
-                  index < 3 ? 'high' : ('medium' as 'high' | 'medium' | 'low'),
-                title:
-                  typeof opt === 'object' && opt.title
-                    ? opt.title
-                    : `Optimization ${index + 1}`,
-                description:
-                  typeof opt === 'object' && opt.description
-                    ? opt.description
-                    : opt.toString(),
-              })
-            )
-          : [],
+        keywords: {
+          found: optimization.optimizedSections?.skills || [],
+          missing: [],
+          suggestions:
+            optimization.keywordOptimization?.suggestedKeywords || [],
+        },
+        suggestions,
         metadata: {
           targetIndustry: validatedData.targetIndustry,
           targetRole: validatedData.targetRole,
+          optimizedSections: optimization.optimizedSections,
+          keywordOptimization: optimization.keywordOptimization,
         },
       },
     });
