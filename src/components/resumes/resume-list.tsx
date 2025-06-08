@@ -113,83 +113,91 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
     <div className="space-y-4">
       {resumes.map(resume => (
         <Card key={resume.id} className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-lg">{resume.title}</CardTitle>
-                <CardDescription className="flex items-center gap-2 mt-1">
-                  <Calendar className="h-4 w-4" />
-                  {formatDate(resume.createdAt)}
+          <CardHeader className="pb-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-start justify-between gap-3">
+                  <CardTitle className="text-lg sm:text-xl leading-6 break-words flex-1">
+                    {resume.title}
+                  </CardTitle>
+                  {resume.isBase && (
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-100 text-blue-800 whitespace-nowrap text-xs flex-shrink-0"
+                    >
+                      Base Template
+                    </Badge>
+                  )}
+                </div>
+                <CardDescription className="flex items-center gap-2 text-sm text-gray-600">
+                  <Calendar className="h-4 w-4 flex-shrink-0" />
+                  <span>{formatDate(resume.createdAt)}</span>
                 </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                {resume.isBase && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-blue-100 text-blue-800"
-                  >
-                    Base Template
-                  </Badge>
-                )}
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <FileText className="h-4 w-4" />
-                  {resume.fileName || 'Unknown file'}
+          <CardContent className="pt-0">
+            {/* File info section */}
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 flex-shrink-0 text-gray-500" />
+                  <span className="font-medium text-sm break-all">
+                    {resume.fileName || 'Unknown file'}
+                  </span>
                 </div>
-                <div>{formatFileSize(resume.fileSize)}</div>
-                {resume.fileType && (
-                  <div className="text-xs px-2 py-1 bg-gray-100 rounded">
-                    {resume.fileType.includes('pdf') ? 'PDF' : 'DOCX'}
-                  </div>
-                )}
+                <div className="flex items-center gap-3 text-xs text-gray-600 ml-6">
+                  <span>{formatFileSize(resume.fileSize)}</span>
+                  {resume.fileType && (
+                    <span className="px-2 py-0.5 bg-white rounded border text-xs font-medium">
+                      {resume.fileType.includes('pdf') ? 'PDF' : 'DOCX'}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="flex items-center gap-1"
-                >
+              {/* Actions section */}
+              <div className="space-y-3">
+                {/* Primary action */}
+                <Button asChild className="w-full h-11 text-base font-medium">
                   <Link
                     href={`/dashboard/resumes/${resume.id}`}
                     prefetch={true}
                   >
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-4 w-4 mr-2" />
                     View Details
                   </Link>
                 </Button>
-                {resume.fileUrl && (
+
+                {/* Secondary actions */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {resume.fileUrl && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        handleDownload(
+                          resume.fileUrl!,
+                          resume.fileName || 'resume'
+                        )
+                      }
+                      className="h-10 text-sm"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      handleDownload(
-                        resume.fileUrl!,
-                        resume.fileName || 'resume'
-                      )
-                    }
-                    className="flex items-center gap-1"
+                    onClick={() => handleDelete(resume.id)}
+                    disabled={deletingId === resume.id}
+                    className="h-10 text-sm text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                   >
-                    <Download className="h-4 w-4" />
-                    Download
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {deletingId === resume.id ? 'Deleting...' : 'Delete'}
                   </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(resume.id)}
-                  disabled={deletingId === resume.id}
-                  className="flex items-center gap-1 text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {deletingId === resume.id ? 'Deleting...' : 'Delete'}
-                </Button>
+                </div>
               </div>
             </div>
           </CardContent>
