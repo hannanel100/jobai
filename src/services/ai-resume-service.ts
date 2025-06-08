@@ -116,7 +116,7 @@ export class AIResumeService {
       temperature: AI_CONFIG.temperature,
       schema: resumeOptimizationSchema,
       prompt: `
-        You are an expert resume writer and career coach. Optimize the following resume to make it more compelling and effective.
+        You are an expert resume writer. Optimize this resume with concise, actionable improvements.
 
         ${industryContext}
         ${roleContext}
@@ -126,19 +126,15 @@ export class AIResumeService {
         ${resumeText}
         """
 
-        Please provide:
-        1. Improved section content (summary, skills, experience descriptions)
-        2. Keyword optimization suggestions with specific placement advice
-        3. Formatting and structure improvements
-        4. Industry-specific tips and best practices
+        Provide optimization suggestions focusing on:
+        1. Enhanced summary (1-2 sentences max)
+        2. Top 10-15 relevant skills only
+        3. 3-5 key experience improvements (brief descriptions)
+        4. 8-10 essential keywords for ATS
+        5. 3-4 formatting tips
+        6. 3-4 industry-specific tips
 
-        Focus on:
-        - Making achievements more quantifiable and impactful
-        - Improving keyword density for ATS systems
-        - Enhancing readability and professional presentation
-        - Tailoring content for the target industry/role if specified
-
-        Provide specific, actionable improvements with clear reasoning.
+        Keep all suggestions concise and actionable. Prioritize quality over quantity.
       `,
     });
 
