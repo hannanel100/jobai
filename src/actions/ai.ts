@@ -515,7 +515,7 @@ export async function optimizeResume(
     }
 
     // Map experience improvements
-    if (optimization.optimizedSections?.experienceImprovements?.length > 0) {
+    if (optimization.optimizedSections?.experienceImprovements?.length) {
       optimization.optimizedSections.experienceImprovements.forEach(
         (improvement, index) => {
           if (improvement?.improvedText && improvement?.reasoning) {
