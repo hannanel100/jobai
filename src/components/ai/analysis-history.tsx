@@ -106,7 +106,7 @@ export function AnalysisHistory({
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [resumeId, selectedAnalysis]);
+  }, [resumeId]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
