@@ -171,7 +171,7 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
             <CardContent className="space-y-4">
               {' '}
               {/* Application Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 text-sm">
                 {application.applicationDeadline && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-gray-400" />

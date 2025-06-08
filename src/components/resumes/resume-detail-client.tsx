@@ -128,7 +128,7 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {/* Left sidebar - Resume info and actions */}
         <div className="space-y-6">
           {/* Resume overview */}

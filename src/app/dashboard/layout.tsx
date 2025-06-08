@@ -3,6 +3,7 @@ import { logout } from '@/actions/auth';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { MobileNav } from '@/components/layout/mobile-nav';
 
 export default async function DashboardLayout({
   children,
@@ -27,7 +28,8 @@ export default async function DashboardLayout({
               >
                 JobTracker AI
               </Link>
-              <nav className="flex space-x-6">
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex space-x-6">
                 <Link
                   href="/dashboard"
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
@@ -49,7 +51,7 @@ export default async function DashboardLayout({
               </nav>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">
+              <span className="hidden sm:block text-sm text-gray-500">
                 Welcome, {session.user?.firstName || 'User'}
               </span>
               <form action={logout}>
@@ -57,6 +59,8 @@ export default async function DashboardLayout({
                   Sign out
                 </Button>
               </form>
+              {/* Mobile Navigation Toggle */}
+              <MobileNav />
             </div>
           </div>
         </div>

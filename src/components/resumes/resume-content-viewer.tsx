@@ -144,7 +144,7 @@ export function ResumeContentViewer({
       {/* Header with actions */}
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
@@ -154,7 +154,7 @@ export function ResumeContentViewer({
                 Extracted text from {resume.fileName || 'your resume'}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -282,7 +282,7 @@ export function ResumeContentViewer({
                 <div className="text-sm text-gray-500">
                   {editedContent.trim().split(/\s+/).length} words
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                   <Button
                     variant="outline"
                     onClick={handleCancel}

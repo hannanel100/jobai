@@ -174,7 +174,7 @@ export function ResumeAnalysisCard({
               <FileCheck className="h-4 w-4" />
               Section Breakdown
             </h4>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               {Object.entries(analysis.sections).map(([section, score]) => (
                 <div key={section} className="space-y-1">
                   <div className="flex items-center justify-between text-sm">
