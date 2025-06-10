@@ -93,9 +93,12 @@ export function AnalysisHistory({
         setAnalyses(parsedAnalyses);
 
         // Auto-select the most recent analysis if none selected
-        if (!selectedAnalysis && parsedAnalyses.length > 0) {
-          setSelectedAnalysis(parsedAnalyses[0]);
-        }
+        setSelectedAnalysis(current => {
+          if (!current && parsedAnalyses.length > 0) {
+            return parsedAnalyses[0];
+          }
+          return current;
+        });
       } else {
         toast.error(result.error || 'Failed to load analysis history');
       }

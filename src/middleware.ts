@@ -1,26 +1,46 @@
 // src/middleware.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { auth } from '@/auth';
 
-export default function middleware(request: NextRequest) {
-  // DEVELOPMENT ONLY: Completely bypass auth for testing
-  const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+export default auth(req => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth?.user;
+
+  // DEVELOPMENT ONLY: Allow bypass for testing
+  const isDev = process.env.NODE_ENV === 'development';
   const bypassAuth = process.env.BYPASS_AUTH === 'true';
 
   if (isDev && bypassAuth) {
     console.log(
       '🚀 Development mode: Authentication bypass enabled for',
-      request.nextUrl.pathname
+      nextUrl.pathname
     );
     return NextResponse.next();
   }
 
-  // For production, implement normal auth logic
-  // For now, we'll allow all requests to proceed
-  return NextResponse.next();
-}
+  // Check if accessing protected routes
+  const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+  const isOnAuth =
+    nextUrl.pathname.startsWith('/auth/') ||
+    nextUrl.pathname.startsWith('/login') ||
+    nextUrl.pathname.startsWith('/register');
 
-// Optionally, don't invoke Middleware on some paths
-// Read more: https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
+  // Redirect to login if trying to access protected route without auth
+  if (isOnDashboard && !isLoggedIn) {
+    const loginUrl = new URL('/auth/login', nextUrl);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Redirect to dashboard if trying to access auth pages while logged in
+  if (isOnAuth && isLoggedIn) {
+    const dashboardUrl = new URL('/dashboard', nextUrl);
+    return NextResponse.redirect(dashboardUrl);
+  }
+
+  return NextResponse.next();
+});
+
+// Apply middleware to all routes except static files and API routes
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

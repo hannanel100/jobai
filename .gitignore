@@ -66,3 +66,10 @@ prisma/dev.db-journal
 
 # Turbopack
 .turbo/
+
+/test-results/*
+/playwright-report/*
+
+# Manual testing scripts
+test-*.js
+debug-*.js
