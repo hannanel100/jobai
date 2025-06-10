@@ -21,6 +21,13 @@ const eslintConfig = [
       'build/**',
     ],
   },
+  {
+    files: ['src/tests/**/*.{ts,tsx}', '**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
 ];
 
 export default eslintConfig;
