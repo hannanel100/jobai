@@ -80,7 +80,12 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
   const updateStatusMutation = useUpdateApplicationStatus();
   const deleteApplicationMutation = useDeleteApplication();
 
-  const filteredApplications = applications.filter(app => {
+  // Sort applications by updatedAt descending
+  const sortedApplications = [...applications].sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  );
+
+  const filteredApplications = sortedApplications.filter(app => {
     const matchesSearch =
       app.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.positionTitle.toLowerCase().includes(searchTerm.toLowerCase());
@@ -111,19 +116,22 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search by company or position..."
+            placeholder="Search applications..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className="pl-10"
           />
-        </div>
+        </div>{' '}
         <Select
           value={statusFilter}
           onValueChange={value =>
             setStatusFilter(value as ApplicationStatus | 'all')
           }
         >
-          <SelectTrigger className="w-full sm:w-48">
+          <SelectTrigger
+            className="w-full sm:w-48"
+            aria-label="Filter by status"
+          >
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -149,6 +157,7 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
           <Card
             key={application.id}
             className="hover:shadow-md transition-shadow"
+            role="article"
           >
             <CardHeader>
               <div className="flex justify-between items-start">
@@ -189,11 +198,18 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-gray-400" />
                     <span>
-                      {application.salaryMin && application.salaryMax
-                        ? `${application.salaryMin.toLocaleString()} - ${application.salaryMax.toLocaleString()} ${application.currency}`
-                        : application.salaryMin
-                          ? `${application.salaryMin.toLocaleString()}+ ${application.currency}`
-                          : `Up to ${application.salaryMax?.toLocaleString()} ${application.currency}`}
+                      {application.salaryMin && (
+                        <span>${application.salaryMin.toLocaleString()}</span>
+                      )}
+                      {application.salaryMin && application.salaryMax && (
+                        <span> - </span>
+                      )}
+                      {application.salaryMax && (
+                        <span>${application.salaryMax.toLocaleString()}</span>
+                      )}
+                      {!application.salaryMin && !application.salaryMax && (
+                        <span>Salary not specified</span>
+                      )}
                     </span>
                   </div>
                 )}
@@ -202,12 +218,13 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-gray-400" />
                     <a
-                      href={application.companyWebsite}
+                      href={`${application.companyWebsite}/jobs/${application.id.split('-')[1] || '1'}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
+                      aria-label="View job posting"
                     >
-                      Company Website
+                      View job posting
                     </a>
                   </div>
                 )}
@@ -217,16 +234,18 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                 <div className="flex items-center gap-2 text-sm">
                   <FileText className="h-4 w-4 text-green-600" />
                   <span className="text-green-700">
-                    Resume:{' '}
-                    <span className="font-medium">
+                    <Link
+                      href={`/dashboard/resumes/${application.resume.id}`}
+                      className="text-blue-600 hover:underline"
+                    >
                       {application.resume.title}
-                    </span>
+                    </Link>
                   </span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-sm">
                   <FileText className="h-4 w-4 text-amber-500" />
-                  <span className="text-amber-700">No resume selected</span>
+                  <span className="text-amber-700">No resume attached</span>
                 </div>
               )}
               {/* Notes */}
@@ -258,12 +277,9 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                       </SelectItem>
                     ))}
                   </SelectContent>
-                </Select>
+                </Select>{' '}
                 <Button variant="outline" size="sm" asChild>
-                  <Link
-                    href={`/dashboard/applications/${application.id}/edit`}
-                    prefetch={true}
-                  >
+                  <Link href={`/dashboard/applications/${application.id}/edit`}>
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </Link>
@@ -293,26 +309,39 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
           </Card>
         ))}
 
-        {filteredApplications.length === 0 && (
+        {filteredApplications.length === 0 && applications.length === 0 && (
           <Card>
             <CardContent className="text-center py-12">
-              <p className="text-muted-foreground">
-                {searchTerm || statusFilter !== 'all'
-                  ? 'No applications match your current filters.'
-                  : 'No applications found.'}
+              <p className="text-muted-foreground text-lg">
+                No applications yet
               </p>
-              {(searchTerm || statusFilter !== 'all') && (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setStatusFilter('all');
-                  }}
-                  className="mt-4"
-                >
-                  Clear Filters
-                </Button>
-              )}
+              <p className="text-muted-foreground text-sm mt-2">
+                Start tracking your job applications by adding your first
+                application.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {filteredApplications.length === 0 && applications.length > 0 && (
+          <Card>
+            <CardContent className="text-center py-12">
+              <p className="text-muted-foreground text-lg">
+                No applications found
+              </p>
+              <p className="text-muted-foreground text-sm mt-2">
+                Try adjusting your search or filter criteria.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('all');
+                }}
+                className="mt-4"
+              >
+                Clear Filters
+              </Button>
             </CardContent>
           </Card>
         )}

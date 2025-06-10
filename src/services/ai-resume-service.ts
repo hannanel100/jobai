@@ -172,4 +172,83 @@ export class AIResumeService {
       quickWins: result.object.strengths.slice(0, 3),
     };
   }
+  static async matchResumeToJob(
+    resumeText: string,
+    jobDescription: string
+  ): Promise<JobMatch> {
+    const result = await generateObject({
+      model: ai,
+      maxTokens: AI_CONFIG.maxTokens,
+      temperature: AI_CONFIG.temperature,
+      schema: jobMatchSchema,
+      prompt: `
+        You are an expert recruiter analyzing how well a resume matches a specific job opportunity.
+
+        Job Description:
+        """
+        ${jobDescription}
+        """
+
+        Resume Text:
+        """
+        ${resumeText}
+        """
+
+        Please analyze:
+        1. Overall match score (0-100) based on how well the resume aligns with job requirements
+        2. Keyword analysis - which keywords from the job description are present/missing
+        3. Skills alignment - how well the candidate's skills match job requirements
+        4. Experience alignment - how relevant is their work experience
+        5. Specific recommendations to improve the match
+        6. Tailoring tips for this specific role
+
+        Be thorough and provide actionable insights.
+      `,
+    });
+
+    return result.object;
+  }
+
+  static async matchResumeToJobAdHoc(
+    resumeText: string,
+    jobDescription: string,
+    jobTitle: string,
+    company: string
+  ): Promise<JobMatch> {
+    const result = await generateObject({
+      model: ai,
+      maxTokens: AI_CONFIG.maxTokens,
+      temperature: AI_CONFIG.temperature,
+      schema: jobMatchSchema,
+      prompt: `
+        You are an expert recruiter analyzing how well a resume matches a specific job opportunity.
+
+        Job Details:
+        - Position: ${jobTitle}
+        - Company: ${company}
+        
+        Job Description:
+        """
+        ${jobDescription}
+        """
+
+        Resume Text:
+        """
+        ${resumeText}
+        """
+
+        Please analyze:
+        1. Overall match score (0-100) based on how well the resume aligns with job requirements
+        2. Keyword analysis - which keywords from the job description are present/missing
+        3. Skills alignment - how well the candidate's skills match job requirements
+        4. Experience alignment - how relevant is their work experience
+        5. Specific recommendations to improve the match
+        6. Tailoring tips for this specific role
+
+        Be thorough and provide actionable insights.
+      `,
+    });
+
+    return result.object;
+  }
 }

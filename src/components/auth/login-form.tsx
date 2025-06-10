@@ -23,7 +23,7 @@ import { LoginSchema } from '@/schemas/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldErrors } from 'react-hook-form';
 import { z } from 'zod';
 
 type LoginFormValues = z.infer<typeof LoginSchema>;
@@ -31,36 +31,62 @@ type LoginFormValues = z.infer<typeof LoginSchema>;
 export default function LoginForm() {
   const [error, setError] = useState<string | undefined>('');
   const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  const onSubmit = (values: LoginFormValues) => {
+  const onSubmit = async (values: LoginFormValues) => {
     setError('');
+    setIsSubmitting(true);
 
-    startTransition(() => {
-      login(values).then(data => {
+    startTransition(async () => {
+      try {
+        const data = await login(values);
         if (data?.error) {
           setError(data.error);
         }
-      });
+      } catch {
+        setError('An unexpected error occurred');
+      } finally {
+        setIsSubmitting(false);
+      }
     });
   };
+  const onInvalid = (errors: FieldErrors<LoginFormValues>) => {
+    console.log('Form validation errors:', errors);
+    setIsSubmitting(false);
+  };
+
+  // Clear error when form values change
+  const handleFormChange = () => {
+    if (error) {
+      setError('');
+    }
+  };
+
+  const isLoading = isPending || isSubmitting;
 
   return (
     <Card className="w-[400px]">
       <CardHeader>
-        <CardTitle>Welcome back</CardTitle>
+        <CardTitle>Sign in</CardTitle>
         <CardDescription>Sign in to your account to continue</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+            className="space-y-6"
+            noValidate
+          >
             <div className="space-y-4">
               <FormField
                 control={form.control}
@@ -71,9 +97,14 @@ export default function LoginForm() {
                     <FormControl>
                       <Input
                         {...field}
-                        disabled={isPending}
+                        disabled={isLoading}
                         placeholder="john.doe@example.com"
                         type="email"
+                        required
+                        onChange={e => {
+                          field.onChange(e);
+                          handleFormChange();
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -89,9 +120,14 @@ export default function LoginForm() {
                     <FormControl>
                       <Input
                         {...field}
-                        disabled={isPending}
+                        disabled={isLoading}
                         placeholder="Enter your password"
                         type="password"
+                        required
+                        onChange={e => {
+                          field.onChange(e);
+                          handleFormChange();
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -104,7 +140,7 @@ export default function LoginForm() {
                 {error}
               </div>
             )}
-            <Button disabled={isPending} type="submit" className="w-full">
+            <Button disabled={isLoading} type="submit" className="w-full">
               Sign in
             </Button>
           </form>
