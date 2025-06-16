@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { theme } from '@/lib/theme';
 
 const features = [
   {
@@ -66,57 +65,50 @@ export default async function Home() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: `linear-gradient(135deg, ${theme.background} 0%, ${theme.neutral}20 100%)`,
-      }}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-[var(--theme-surface)] to-[var(--theme-neutral)]/20">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold"
-              style={{ backgroundColor: theme.primary }}
-            >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold bg-[var(--theme-primary)]">
               JT
             </div>
-            <span
-              className="text-xl font-bold"
-              style={{ color: theme.primary }}
-            >
+            <span className="text-xl font-bold text-[var(--theme-primary)]">
               JobTracker AI
             </span>
           </div>
           <div className="hidden md:flex space-x-8">
             <Link
               href="#features"
-              className="hover:opacity-75"
-              style={{ color: theme.secondary }}
+              className="hover:opacity-75 text-[var(--theme-text-secondary)]"
             >
               Features
             </Link>
             <Link
               href="#how-it-works"
-              className="hover:opacity-75"
-              style={{ color: theme.secondary }}
+              className="hover:opacity-75 text-[var(--theme-text-secondary)]"
             >
               How it Works
             </Link>
             <Link
               href="#pricing"
-              className="hover:opacity-75"
-              style={{ color: theme.secondary }}
+              className="hover:opacity-75 text-[var(--theme-text-secondary)]"
             >
               Pricing
             </Link>
           </div>
           <div className="space-x-4">
-            <Button asChild variant="ghost" style={{ color: theme.secondary }}>
+            <Button
+              asChild
+              variant="ghost"
+              className="text-[var(--theme-text-secondary)]"
+            >
               <Link href="/auth/login">Sign In</Link>
             </Button>
-            <Button asChild style={{ backgroundColor: theme.primary }}>
+            <Button
+              asChild
+              className="bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-secondary)]"
+            >
               <Link href="/auth/register">Get Started</Link>
             </Button>
           </div>
@@ -126,19 +118,11 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1
-            className="text-5xl md:text-6xl font-bold mb-6 leading-tight"
-            style={{ color: theme.primary }}
-          >
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-[var(--theme-primary)]">
             Land Your Dream Job
-            <span style={{ color: theme.accent }} className="block">
-              10x Faster
-            </span>
+            <span className="block text-[var(--theme-accent)]">10x Faster</span>
           </h1>
-          <p
-            className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed"
-            style={{ color: theme.secondary }}
-          >
+          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed text-[var(--theme-text-secondary)]">
             The most intelligent job search platform that combines AI-powered
             insights, automated tracking, and recruiter connections to
             accelerate your career growth.
@@ -147,8 +131,7 @@ export default async function Home() {
             <Button
               asChild
               size="lg"
-              className="text-lg px-8 py-6"
-              style={{ backgroundColor: theme.primary }}
+              className="text-lg px-8 py-6 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-secondary)]"
             >
               <Link href="/auth/register" className="flex items-center">
                 Start Your Job Search
@@ -159,8 +142,7 @@ export default async function Home() {
               asChild
               variant="outline"
               size="lg"
-              className="text-lg px-8 py-6"
-              style={{ borderColor: theme.accent, color: theme.accent }}
+              className="text-lg px-8 py-6 border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white"
             >
               <Link href="/auth/login">Sign In</Link>
             </Button>
@@ -170,16 +152,10 @@ export default async function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div
-                  className="text-3xl font-bold mb-1"
-                  style={{ color: theme.primary }}
-                >
+                <div className="text-3xl font-bold mb-1 text-[var(--theme-primary)]">
                   {stat.number}
                 </div>
-                <div
-                  className="text-sm opacity-75"
-                  style={{ color: theme.secondary }}
-                >
+                <div className="text-sm opacity-75 text-[var(--theme-text-secondary)]">
                   {stat.label}
                 </div>
               </div>
@@ -189,23 +165,13 @@ export default async function Home() {
       </section>
 
       {/* Features Section */}
-      <section
-        id="features"
-        className="py-20"
-        style={{ backgroundColor: `${theme.background}80` }}
-      >
+      <section id="features" className="py-20 bg-[var(--theme-surface)]/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2
-              className="text-4xl font-bold mb-4"
-              style={{ color: theme.primary }}
-            >
+            <h2 className="text-4xl font-bold mb-4 text-[var(--theme-primary)]">
               Everything You Need to Succeed
             </h2>
-            <p
-              className="text-xl max-w-2xl mx-auto"
-              style={{ color: theme.secondary }}
-            >
+            <p className="text-xl max-w-2xl mx-auto text-[var(--theme-text-secondary)]">
               Powerful tools and insights designed to give you a competitive
               edge in today&apos;s job market.
             </p>
@@ -217,16 +183,10 @@ export default async function Home() {
                 className="border-0 shadow-lg hover:shadow-xl transition-shadow"
               >
                 <CardHeader>
-                  <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
-                    style={{ backgroundColor: `${theme.accent}20` }}
-                  >
-                    <feature.icon
-                      className="h-6 w-6"
-                      style={{ color: theme.accent }}
-                    />
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-[var(--theme-accent)]/20">
+                    <feature.icon className="h-6 w-6 text-[var(--theme-accent)]" />
                   </div>
-                  <CardTitle style={{ color: theme.primary }}>
+                  <CardTitle className="text-[var(--theme-primary)]">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
@@ -245,16 +205,10 @@ export default async function Home() {
       <section id="how-it-works" className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2
-              className="text-4xl font-bold mb-4"
-              style={{ color: theme.primary }}
-            >
+            <h2 className="text-4xl font-bold mb-4 text-[var(--theme-primary)]">
               How JobTracker AI Works
             </h2>
-            <p
-              className="text-xl max-w-2xl mx-auto"
-              style={{ color: theme.secondary }}
-            >
+            <p className="text-xl max-w-2xl mx-auto text-[var(--theme-text-secondary)]">
               Three simple steps to transform your job search and accelerate
               your career.
             </p>
@@ -281,22 +235,13 @@ export default async function Home() {
               },
             ].map((item, index) => (
               <div key={index} className="text-center">
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6"
-                  style={{ backgroundColor: theme.accent }}
-                >
+                <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 bg-[var(--theme-accent)]">
                   {item.step}
                 </div>
-                <h3
-                  className="text-xl font-semibold mb-4"
-                  style={{ color: theme.primary }}
-                >
+                <h3 className="text-xl font-semibold mb-4 text-[var(--theme-primary)]">
                   {item.title}
                 </h3>
-                <p
-                  className="leading-relaxed"
-                  style={{ color: theme.secondary }}
-                >
+                <p className="leading-relaxed text-[var(--theme-text-secondary)]">
                   {item.description}
                 </p>
               </div>
@@ -306,7 +251,7 @@ export default async function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20" style={{ backgroundColor: theme.primary }}>
+      <section className="py-20 bg-[var(--theme-primary)]">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold text-white mb-4">
             Ready to Transform Your Job Search?
@@ -318,8 +263,7 @@ export default async function Home() {
           <Button
             asChild
             size="lg"
-            className="text-lg px-8 py-6"
-            style={{ backgroundColor: theme.accent, color: 'white' }}
+            className="text-lg px-8 py-6 bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90"
           >
             <Link href="/auth/register" className="flex items-center">
               Get Started Today
@@ -330,52 +274,40 @@ export default async function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12" style={{ backgroundColor: theme.background }}>
+      <footer className="py-12 bg-[var(--theme-surface)]">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold"
-                style={{ backgroundColor: theme.primary }}
-              >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold bg-[var(--theme-primary)]">
                 JT
               </div>
-              <span
-                className="text-xl font-bold"
-                style={{ color: theme.primary }}
-              >
+              <span className="text-xl font-bold text-[var(--theme-primary)]">
                 JobTracker AI
               </span>
             </div>
             <div className="flex space-x-8">
               <Link
                 href="/privacy"
-                className="hover:opacity-75"
-                style={{ color: theme.secondary }}
+                className="hover:opacity-75 text-[var(--theme-text-secondary)]"
               >
                 Privacy
               </Link>
               <Link
                 href="/terms"
-                className="hover:opacity-75"
-                style={{ color: theme.secondary }}
+                className="hover:opacity-75 text-[var(--theme-text-secondary)]"
               >
                 Terms
               </Link>
               <Link
                 href="/support"
-                className="hover:opacity-75"
-                style={{ color: theme.secondary }}
+                className="hover:opacity-75 text-[var(--theme-text-secondary)]"
               >
                 Support
               </Link>
             </div>
           </div>
-          <div
-            className="border-t mt-8 pt-8 text-center"
-            style={{ borderColor: `${theme.neutral}40` }}
-          >
-            <p style={{ color: theme.secondary }}>
+          <div className="border-t mt-8 pt-8 text-center border-[var(--theme-neutral)]/40">
+            <p className="text-[var(--theme-text-secondary)]">
               © 2025 JobTracker AI. All rights reserved.
             </p>
           </div>
