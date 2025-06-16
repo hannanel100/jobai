@@ -10,6 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+// Removed theme import - using CSS variables instead
 import {
   Star,
   TrendingUp,
@@ -328,7 +329,10 @@ export function ResumeAnalysisCard({
         {/* Action Button */}
         {onOptimize && analysis.type !== 'OPTIMIZATION' && (
           <div className="pt-4 border-t">
-            <Button onClick={onOptimize} className="w-full">
+            <Button
+              onClick={onOptimize}
+              className="w-full bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
+            >
               <Brain className="h-4 w-4 mr-2" />
               Get Optimization Suggestions
             </Button>

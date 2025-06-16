@@ -75,10 +75,17 @@ export default function LoginForm() {
   const isLoading = isPending || isSubmitting;
 
   return (
-    <Card className="w-[400px]">
-      <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>Sign in to your account to continue</CardDescription>
+    <Card className="w-[400px] shadow-2xl bg-white border-[var(--theme-accent)]/30 border-t-4 border-t-[var(--theme-primary)]">
+      <CardHeader className="text-center space-y-4">
+        <div className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold mx-auto shadow-lg bg-[var(--theme-primary)]">
+          JT
+        </div>
+        <CardTitle className="text-2xl text-[var(--theme-primary)]">
+          Sign in
+        </CardTitle>
+        <CardDescription className="text-[var(--theme-text-secondary)]">
+          Sign in to your account to continue
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -93,7 +100,9 @@ export default function LoginForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-[var(--theme-primary)]">
+                      Email
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -101,6 +110,7 @@ export default function LoginForm() {
                         placeholder="john.doe@example.com"
                         type="email"
                         required
+                        className="border-gray-200 focus:border-2 border-[var(--theme-neutral)]40 focus:ring-[var(--theme-accent)]"
                         onChange={e => {
                           field.onChange(e);
                           handleFormChange();
@@ -116,7 +126,9 @@ export default function LoginForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-[var(--theme-primary)]">
+                      Password
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -124,6 +136,7 @@ export default function LoginForm() {
                         placeholder="Enter your password"
                         type="password"
                         required
+                        className="border-gray-200 focus:border-2 border-[var(--theme-neutral)]40 focus:ring-[var(--theme-accent)]"
                         onChange={e => {
                           field.onChange(e);
                           handleFormChange();
@@ -136,20 +149,27 @@ export default function LoginForm() {
               />
             </div>
             {error && (
-              <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive">
+              <div className="bg-red-50 border border-red-200 p-3 rounded-md flex items-center gap-x-2 text-sm text-red-600">
                 {error}
               </div>
             )}
-            <Button disabled={isLoading} type="submit" className="w-full">
+            <Button
+              disabled={isLoading}
+              type="submit"
+              className="w-full text-white bg-[var(--theme-primary)]"
+            >
               Sign in
             </Button>
           </form>
         </Form>
       </CardContent>
-      <CardFooter>
-        <div className="text-sm text-muted-foreground">
+      <CardFooter className="justify-center">
+        <div className="text-sm text-[var(--theme-secondary)]">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/register" className="text-primary hover:underline">
+          <Link
+            href="/auth/register"
+            className="hover:underline font-medium text-[var(--theme-accent)]"
+          >
             Sign up
           </Link>
         </div>

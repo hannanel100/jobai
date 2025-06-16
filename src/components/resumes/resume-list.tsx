@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { deleteResume } from '@/actions/resumes';
+// Removed theme import - using CSS variables instead
 import { toast } from 'sonner';
 import { FileText, Download, Trash2, Calendar, Eye } from 'lucide-react';
 
@@ -93,14 +94,14 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
 
   if (resumes.length === 0) {
     return (
-      <Card>
+      <Card className="bg-white border-[var(--theme-accent)]/30 border-t-4 border-t-[var(--theme-primary)]">
         <CardContent className="pt-6">
           <div className="text-center py-8">
             <FileText className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-4 text-lg font-medium text-gray-900">
+            <h3 className="mt-4 text-lg font-medium text-[var(--theme-primary)]">
               No resumes uploaded
             </h3>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-[var(--theme-secondary)]">
               Upload your first resume to get started with job applications.
             </p>
           </div>
@@ -112,24 +113,27 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
   return (
     <div className="space-y-4">
       {resumes.map(resume => (
-        <Card key={resume.id} className="hover:shadow-md transition-shadow">
+        <Card
+          key={resume.id}
+          className="hover:shadow-md transition-shadow bg-white border-[var(--theme-accent)]/30 border-l-4 border-l-[var(--theme-accent)]"
+        >
           <CardHeader className="pb-4">
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-2">
                 <div className="flex items-start justify-between gap-3">
-                  <CardTitle className="text-lg sm:text-xl leading-6 break-words flex-1">
+                  <CardTitle className="text-lg sm:text-xl leading-6 break-words flex-1 text-[var(--theme-primary)]">
                     {resume.title}
                   </CardTitle>
                   {resume.isBase && (
                     <Badge
                       variant="secondary"
-                      className="bg-blue-100 text-blue-800 whitespace-nowrap text-xs flex-shrink-0"
+                      className="whitespace-nowrap text-xs flex-shrink-0 bg-[var(--theme-accent)]/20 text-[var(--theme-accent)]"
                     >
                       Base Template
                     </Badge>
                   )}
                 </div>
-                <CardDescription className="flex items-center gap-2 text-sm text-gray-600">
+                <CardDescription className="flex items-center gap-2 text-sm text-[var(--theme-secondary)]">
                   <Calendar className="h-4 w-4 flex-shrink-0" />
                   <span>{formatDate(resume.createdAt)}</span>
                 </CardDescription>
@@ -159,7 +163,10 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
               {/* Actions section */}
               <div className="space-y-3">
                 {/* Primary action */}
-                <Button asChild className="w-full h-11 text-base font-medium">
+                <Button
+                  asChild
+                  className="w-full h-11 text-base font-medium bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
+                >
                   <Link
                     href={`/dashboard/resumes/${resume.id}`}
                     prefetch={true}
@@ -181,7 +188,7 @@ export function ResumeList({ resumes, onResumeDeleted }: ResumeListProps) {
                           resume.fileName || 'resume'
                         )
                       }
-                      className="h-10 text-sm"
+                      className="h-10 text-sm border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download

@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { createResume } from '@/actions/resumes';
+// Removed theme import - using CSS variables instead
 import { toast } from 'sonner';
 
 interface ResumeUploadProps {
@@ -106,23 +107,28 @@ export function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto bg-white border-[var(--theme-accent)]/30 border-t-4 border-t-[var(--theme-primary)]">
       <CardHeader>
-        <CardTitle>Upload Resume</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-[var(--theme-primary)]">
+          Upload Resume
+        </CardTitle>
+        <CardDescription className="text-[var(--theme-secondary)]">
           Upload your resume in PDF or DOCX format (max 4MB). Text content will
           be automatically extracted for AI analysis.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="title">Resume Title</Label>
+          <Label htmlFor="title" className="text-[var(--theme-primary)]">
+            Resume Title
+          </Label>
           <Input
             id="title"
             placeholder="e.g., Software Engineer Resume, Marketing Manager CV"
             value={title}
             onChange={e => setTitle(e.target.value)}
             disabled={isUploading}
+            className="border-gray-200 focus:border-2 border-[var(--theme-neutral)]40 focus:ring-[var(--theme-accent)]"
           />
         </div>
 
@@ -135,12 +141,15 @@ export function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
             disabled={isUploading}
             className="rounded border-gray-300"
           />
-          <Label htmlFor="isBase" className="text-sm font-medium">
+          <Label
+            htmlFor="isBase"
+            className="text-sm font-medium text-[var(--theme-secondary)]"
+          >
             Use as base resume template
           </Label>
         </div>
 
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+        <div className="border-2 border-dashed rounded-lg p-6 border-[var(--theme-accent)]/40">
           <UploadButton
             endpoint="resumeUploader"
             onClientUploadComplete={handleUploadComplete}
@@ -151,7 +160,7 @@ export function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
         </div>
 
         {isUploading && (
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-[var(--theme-secondary)]">
             Processing upload and extracting content...
           </div>
         )}

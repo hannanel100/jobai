@@ -146,7 +146,7 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
       </div>
 
       {/* Results count */}
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-[var(--theme-text-secondary)]">
         Showing {filteredApplications.length} of {applications.length}{' '}
         applications
       </div>
@@ -156,16 +156,16 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
         {filteredApplications.map(application => (
           <Card
             key={application.id}
-            className="hover:shadow-md transition-shadow"
+            className="hover:shadow-md transition-shadow bg-white border border-[var(--theme-accent)]30 border-l-4 border-l-[var(--theme-accent)]"
             role="article"
           >
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
-                  <CardTitle className="text-xl">
+                  <CardTitle className="text-xl text-[var(--theme-primary)]">
                     {application.positionTitle}
                   </CardTitle>
-                  <CardDescription className="text-lg font-medium">
+                  <CardDescription className="text-lg font-medium text-[var(--theme-text-secondary)]">
                     {application.companyName}
                   </CardDescription>
                 </div>
@@ -180,10 +180,10 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
             <CardContent className="space-y-4">
               {' '}
               {/* Application Details */}
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 text-sm">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 text-sm text-[var(--theme-text-secondary)]">
                 {application.applicationDeadline && (
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-400" />
+                    <Calendar className="h-4 w-4 text-[var(--theme-neutral)]" />
                     <span>
                       Deadline:{' '}
                       {format(
@@ -196,7 +196,7 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
 
                 {(application.salaryMin || application.salaryMax) && (
                   <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-gray-400" />
+                    <DollarSign className="h-4 w-4 text-[var(--theme-neutral)]" />
                     <span>
                       {application.salaryMin && (
                         <span>${application.salaryMin.toLocaleString()}</span>
@@ -216,12 +216,12 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
 
                 {application.companyWebsite && (
                   <div className="flex items-center gap-2">
-                    <ExternalLink className="h-4 w-4 text-gray-400" />
+                    <ExternalLink className="h-4 w-4 text-[var(--theme-neutral)]" />
                     <a
                       href={`${application.companyWebsite}/jobs/${application.id.split('-')[1] || '1'}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="hover:underline text-[var(--theme-accent)]"
                       aria-label="View job posting"
                     >
                       View job posting
@@ -232,11 +232,11 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
               {/* Resume Information */}
               {application.resume ? (
                 <div className="flex items-center gap-2 text-sm">
-                  <FileText className="h-4 w-4 text-green-600" />
-                  <span className="text-green-700">
+                  <FileText className="h-4 w-4 text-[var(--theme-accent)]" />
+                  <span className="text-[var(--theme-accent)]">
                     <Link
                       href={`/dashboard/resumes/${application.resume.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="hover:underline text-[var(--theme-accent)]"
                     >
                       {application.resume.title}
                     </Link>
@@ -244,13 +244,15 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-sm">
-                  <FileText className="h-4 w-4 text-amber-500" />
-                  <span className="text-amber-700">No resume attached</span>
+                  <FileText className="h-4 w-4 text-[var(--theme-neutral)]" />
+                  <span className="text-[var(--theme-text-secondary)]">
+                    No resume attached
+                  </span>
                 </div>
               )}
               {/* Notes */}
               {application.notes && (
-                <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                <div className="text-sm p-3 rounded-md text-[var(--theme-text-secondary)] bg-[var(--theme-surface)]">
                   {application.notes}
                 </div>
               )}
@@ -278,7 +280,12 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                     ))}
                   </SelectContent>
                 </Select>{' '}
-                <Button variant="outline" size="sm" asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-all duration-200"
+                >
                   <Link href={`/dashboard/applications/${application.id}/edit`}>
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
@@ -288,14 +295,14 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => handleDelete(application.id)}
-                  className="text-red-600 hover:text-red-700"
+                  className="border-[var(--theme-neutral)] text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete
                 </Button>
               </div>
               {/* Metadata */}
-              <div className="text-xs text-gray-400 pt-2 border-t">
+              <div className="text-xs pt-2 border-t text-[var(--theme-neutral)] border-[var(--theme-neutral)]20">
                 Created:{' '}
                 {format(new Date(application.createdAt), 'MMM d, yyyy')}
                 {application.appliedDate && (
@@ -310,12 +317,12 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
         ))}
 
         {filteredApplications.length === 0 && applications.length === 0 && (
-          <Card>
+          <Card className="bg-white border border-[var(--theme-accent)]30 border-t-4 border-t-[var(--theme-primary)]">
             <CardContent className="text-center py-12">
-              <p className="text-muted-foreground text-lg">
+              <p className="text-lg text-[var(--theme-text-secondary)]">
                 No applications yet
               </p>
-              <p className="text-muted-foreground text-sm mt-2">
+              <p className="text-sm mt-2 text-[var(--theme-text-secondary)]">
                 Start tracking your job applications by adding your first
                 application.
               </p>
@@ -324,12 +331,12 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
         )}
 
         {filteredApplications.length === 0 && applications.length > 0 && (
-          <Card>
+          <Card className="bg-white border border-[var(--theme-accent)]30 border-t-4 border-t-[var(--theme-secondary)]">
             <CardContent className="text-center py-12">
-              <p className="text-muted-foreground text-lg">
+              <p className="text-lg text-[var(--theme-text-secondary)]">
                 No applications found
               </p>
-              <p className="text-muted-foreground text-sm mt-2">
+              <p className="text-sm mt-2 text-[var(--theme-text-secondary)]">
                 Try adjusting your search or filter criteria.
               </p>
               <Button
@@ -338,7 +345,7 @@ export function ApplicationsList({ applications }: ApplicationsListProps) {
                   setSearchTerm('');
                   setStatusFilter('all');
                 }}
-                className="mt-4"
+                className="mt-4 border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-all duration-200"
               >
                 Clear Filters
               </Button>

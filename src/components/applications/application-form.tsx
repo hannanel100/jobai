@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+// Removed theme import - using CSS variables instead
 
 const applicationSourceOptions = [
   { value: ApplicationSource.LINKEDIN, label: 'LinkedIn' },
@@ -96,10 +97,12 @@ export function ApplicationForm() {
   };
 
   return (
-    <Card className="max-w-2xl">
+    <Card className="max-w-2xl border-[var(--theme-accent)]/20 border-t-4 border-t-[var(--theme-primary)] bg-white">
       <CardHeader>
-        <CardTitle>Job Application Details</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-[var(--theme-primary)]">
+          Job Application Details
+        </CardTitle>
+        <CardDescription className="text-[var(--theme-text-secondary)]">
           Enter the details for your job application
         </CardDescription>
       </CardHeader>
@@ -370,14 +373,15 @@ export function ApplicationForm() {
               variant="outline"
               onClick={() => router.back()}
               disabled={isLoading}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto hover:opacity-80 transition-opacity border-[var(--theme-neutral)] text-[var(--theme-secondary)]"
+              // Removed inline styles, using CSS variables instead
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto text-white hover:opacity-90 transition-opacity bg-[var(--theme-primary)]"
             >
               {isLoading ? 'Creating...' : 'Create Application'}
             </Button>

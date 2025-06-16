@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+// Removed theme import - using CSS variables instead
 import {
   Brain,
   Star,
@@ -305,8 +306,13 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
               <CardDescription>
                 Recent AI analysis results and recommendations
               </CardDescription>
-            </div>
-            <Button variant="outline" size="sm" asChild>
+            </div>{' '}
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
+            >
               <Link href="/dashboard/resumes">
                 <FileText className="h-4 w-4 mr-2" />
                 Manage Resumes
@@ -326,7 +332,6 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
                 Upload a resume and run AI analysis to get personalized
                 insights, scores, and optimization suggestions.
               </p>
-
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-6">
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
@@ -354,16 +359,23 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
                     impact
                   </p>
                 </div>
-              </div>
-
+              </div>{' '}
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button asChild>
+                {' '}
+                <Button
+                  asChild
+                  className="bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
+                >
                   <Link href="/dashboard/resumes">
                     <FileText className="h-4 w-4 mr-2" />
                     Upload Resume
                   </Link>
-                </Button>
-                <Button variant="outline" asChild>
+                </Button>{' '}
+                <Button
+                  variant="outline"
+                  asChild
+                  className="border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
+                >
                   <Link href="/dashboard/applications/new">
                     Add Job Application
                   </Link>
@@ -403,8 +415,13 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
                         </p>
                         <Progress value={analysis.score} className="w-16 h-1" />
                       </div>
-                    )}
-                    <Button variant="ghost" size="sm" asChild>
+                    )}{' '}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="text-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/10 transition-colors duration-200"
+                    >
                       <Link href={`/dashboard/resumes/${analysis.resumeId}`}>
                         <ChevronRight className="h-4 w-4" />
                       </Link>
@@ -415,7 +432,13 @@ export function AIInsightsDashboard({ userId }: AIInsightsDashboardProps) {
 
               {recentAnalyses.length > 5 && (
                 <div className="text-center pt-4">
-                  <Button variant="outline" size="sm" asChild>
+                  {' '}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    className="border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
+                  >
                     <Link href="/dashboard/resumes">
                       View All Analyses
                       <ChevronRight className="h-4 w-4 ml-2" />

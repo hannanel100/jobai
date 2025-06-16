@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { updateResume } from '@/actions/resumes';
 import { toast } from 'sonner';
+// Removed theme import - using CSS variables instead
 import {
   FileText,
   Edit,
@@ -129,7 +130,10 @@ export function ResumeContentViewer({
               The resume content could not be automatically extracted. You can
               manually add content by editing this resume.
             </p>
-            <Button onClick={handleEdit} className="mt-4">
+            <Button
+              onClick={handleEdit}
+              className="mt-4 bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
+            >
               <Edit className="h-4 w-4 mr-2" />
               Add Content Manually
             </Button>
@@ -159,6 +163,7 @@ export function ResumeContentViewer({
                 variant="outline"
                 size="sm"
                 onClick={() => setShowMetadata(!showMetadata)}
+                className="border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
               >
                 {showMetadata ? (
                   <EyeOff className="h-4 w-4" />
@@ -168,7 +173,11 @@ export function ResumeContentViewer({
                 {showMetadata ? 'Hide' : 'Show'} Details
               </Button>
               {!isEditing && (
-                <Button onClick={handleEdit} size="sm">
+                <Button
+                  onClick={handleEdit}
+                  size="sm"
+                  className="bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
+                >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Content
                 </Button>
@@ -287,6 +296,7 @@ export function ResumeContentViewer({
                     variant="outline"
                     onClick={handleCancel}
                     disabled={isSaving}
+                    className="border-[var(--theme-neutral)] text-[var(--theme-secondary)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
                   >
                     <X className="h-4 w-4 mr-2" />
                     Cancel
@@ -294,6 +304,7 @@ export function ResumeContentViewer({
                   <Button
                     onClick={handleSave}
                     disabled={isSaving || !editedContent.trim()}
+                    className="bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     {isSaving ? 'Saving...' : 'Save Changes'}
@@ -310,7 +321,12 @@ export function ResumeContentViewer({
               </div>
               <div className="flex items-center justify-between text-sm text-gray-500">
                 <span>Content ready for AI analysis</span>
-                <Button variant="ghost" size="sm" onClick={handleEdit}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleEdit}
+                  className="border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
+                >
                   <Edit className="h-4 w-4 mr-1" />
                   Make changes
                 </Button>

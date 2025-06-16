@@ -7,16 +7,17 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+// Removed theme import - using CSS variables instead
 import {
   Brain,
   Star,
-  Target,
-  TrendingUp,
   FileText,
   Clock,
   Zap,
   ChevronRight,
   AlertTriangle,
+  Target,
+  TrendingUp,
 } from 'lucide-react';
 import { ResumeAnalysis, AnalysisType } from '@prisma/client';
 import Link from 'next/link';
@@ -239,7 +240,12 @@ export function ServerAIInsightsDashboard({
                 Recent AI analysis results and recommendations
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm" asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
+            >
               <Link href="/dashboard/resumes">
                 <FileText className="h-4 w-4 mr-2" />
                 Manage Resumes
@@ -290,13 +296,19 @@ export function ServerAIInsightsDashboard({
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button asChild>
+                <Button
+                  asChild
+                  className="text-white hover:opacity-90 transition-opacity bg-[var(--theme-primary)]"
+                >
                   <Link href="/dashboard/resumes">
                     <FileText className="h-4 w-4 mr-2" />
-                    Upload Resume
                   </Link>
                 </Button>
-                <Button variant="outline" asChild>
+                <Button
+                  variant="outline"
+                  asChild
+                  className="hover:opacity-80 transition-opacity border-[var(--theme-accent)] text-[var(--theme-accent)]"
+                >
                   <Link href="/dashboard/applications/new">
                     Add Job Application
                   </Link>
@@ -337,7 +349,12 @@ export function ServerAIInsightsDashboard({
                         <Progress value={analysis.score} className="w-16 h-1" />
                       </div>
                     )}
-                    <Button variant="ghost" size="sm" asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="text-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/10 transition-colors duration-200"
+                    >
                       <Link href={`/dashboard/resumes/${analysis.resumeId}`}>
                         <ChevronRight className="h-4 w-4" />
                       </Link>
@@ -348,7 +365,12 @@ export function ServerAIInsightsDashboard({
 
               {analyses.length > 5 && (
                 <div className="text-center pt-4">
-                  <Button variant="outline" size="sm" asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    className="border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
+                  >
                     <Link href="/dashboard/resumes">
                       View All Analyses
                       <ChevronRight className="h-4 w-4 ml-2" />

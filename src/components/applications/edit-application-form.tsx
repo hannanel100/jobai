@@ -123,10 +123,12 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
   };
 
   return (
-    <Card className="max-w-2xl">
+    <Card className="max-w-2xl bg-white border-[var(--theme-accent)]/20 border-t-4 border-t-[var(--theme-primary)]">
       <CardHeader>
-        <CardTitle>Edit Job Application</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-[var(--theme-primary)]">
+          Edit Job Application
+        </CardTitle>
+        <CardDescription className="text-[var(--theme-text-secondary)]">
           Update the details for your job application
         </CardDescription>
       </CardHeader>
@@ -409,10 +411,15 @@ export function EditApplicationForm({ application }: EditApplicationFormProps) {
               variant="outline"
               onClick={() => router.back()}
               disabled={isLoading}
+              className="hover:opacity-80 transition-opacity text-[var(--theme-secondary)] border-[var(--theme-neutral)]"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="text-white hover:opacity-90 transition-opacity bg-[var(--theme-primary)]"
+            >
               {isLoading ? 'Updating...' : 'Update Application'}
             </Button>
           </div>

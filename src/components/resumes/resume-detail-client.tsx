@@ -16,6 +16,7 @@ import { ResumeContentViewer } from '@/components/resumes/resume-content-viewer'
 import { AIAnalysisControls } from '@/components/ai/ai-analysis-controls';
 import { AnalysisHistory } from '@/components/ai/analysis-history';
 import { useDeleteResume } from '@/hooks/use-resumes';
+// Removed theme import - using CSS variables instead
 import {
   ArrowLeft,
   Download,
@@ -115,7 +116,7 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="shrink-0"
+          className="shrink-0 border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
@@ -219,7 +220,7 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
               {resume.fileUrl && (
                 <Button
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
                   onClick={() =>
                     handleDownload(resume.fileUrl!, resume.fileName || 'resume')
                   }
@@ -231,7 +232,7 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
 
               <Button
                 variant="destructive"
-                className="w-full justify-start"
+                className="w-full justify-start bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={deleteResume.isPending}
               >
@@ -251,6 +252,7 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
                       variant="destructive"
                       onClick={handleDelete}
                       disabled={deleteResume.isPending}
+                      className="bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
                     >
                       Yes, Delete
                     </Button>
@@ -258,6 +260,7 @@ export function ResumeDetailClient({ resume }: ResumeDetailClientProps) {
                       size="sm"
                       variant="outline"
                       onClick={() => setShowDeleteConfirm(false)}
+                      className="border-[var(--theme-neutral)] text-[var(--theme-secondary)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
                     >
                       Cancel
                     </Button>

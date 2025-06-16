@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+// Removed theme import - using CSS variables instead
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -22,17 +23,16 @@ export function MobileNav() {
 
   return (
     <div className="md:hidden">
-      {/* Mobile menu button */}
+      {/* Mobile menu button */}{' '}
       <Button
         variant="ghost"
         size="sm"
         onClick={toggleMenu}
-        className="p-2"
+        className="p-2 border-[var(--theme-accent)] text-[var(--theme-primary)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
         aria-label="Toggle menu"
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
-
       {/* Mobile menu overlay */}
       {isOpen && (
         <>
@@ -52,7 +52,7 @@ export function MobileNav() {
                   variant="ghost"
                   size="sm"
                   onClick={closeMenu}
-                  className="p-2"
+                  className="p-2 border-[var(--theme-accent)] text-[var(--theme-primary)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
                   aria-label="Close menu"
                 >
                   <X className="h-5 w-5" />

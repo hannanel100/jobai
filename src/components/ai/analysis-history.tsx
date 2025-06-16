@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTheme } from '@/components/theme/css-variable-theme-provider';
 import {
   History,
   Star,
@@ -65,6 +66,10 @@ export function AnalysisHistory({
   const [selectedAnalysis, setSelectedAnalysis] =
     useState<AnalysisWithData | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Get theme classes from the improved theme system
+  const { classes } = useTheme();
+
   const fetchAnalyses = useCallback(async () => {
     try {
       const result = await getResumeAnalyses(resumeId);
@@ -235,6 +240,7 @@ export function AnalysisHistory({
               size="sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
+              className={`${classes.buttonGhost} ${classes.focusRing}`}
             >
               <RefreshCw
                 className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}

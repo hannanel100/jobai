@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+// Removed theme import - using CSS variables instead
 import {
   Brain,
   Star,
@@ -250,7 +251,7 @@ export function AIAnalysisControls({
             <Button
               onClick={handleComprehensiveAnalysis}
               disabled={disabled || isAnyAnalysisRunning || isRateLimited}
-              className="w-full"
+              className="w-full bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
               size="sm"
             >
               {isAnalyzing ? (
@@ -282,7 +283,11 @@ export function AIAnalysisControls({
               onClick={() => setShowJobInput(!showJobInput)}
               disabled={disabled || isAnyAnalysisRunning || isRateLimited}
               variant={showJobInput ? 'secondary' : 'default'}
-              className="w-full"
+              className={`w-full text-white transition-colors duration-200 ${
+                showJobInput
+                  ? 'bg-[var(--theme-secondary)] hover:bg-[var(--theme-accent)]'
+                  : 'bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)]'
+              }`}
               size="sm"
             >
               {isRateLimited ? (
@@ -311,7 +316,7 @@ export function AIAnalysisControls({
             <Button
               onClick={handleOptimization}
               disabled={disabled || isAnyAnalysisRunning || isRateLimited}
-              className="w-full"
+              className="w-full bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
               size="sm"
             >
               {isOptimizing ? (
@@ -368,6 +373,7 @@ export function AIAnalysisControls({
                       setShowJobInput(false);
                     }}
                     disabled={isAnyAnalysisRunning}
+                    className="border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors duration-200"
                   >
                     Cancel
                   </Button>{' '}
@@ -380,6 +386,7 @@ export function AIAnalysisControls({
                       isRateLimited
                     }
                     size="sm"
+                    className="bg-[var(--theme-primary)] hover:bg-[var(--theme-secondary)] text-white transition-colors duration-200"
                   >
                     {isMatching ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
