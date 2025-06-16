@@ -3,6 +3,29 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Theme CSS Custom Properties */
+:root {
+  /* Default theme (Ocean) */
+  --theme-primary: #0ea5e9;
+  --theme-secondary: #0284c7;
+  --theme-accent: #0369a1;
+  --theme-success: #10b981;
+  --theme-warning: #f59e0b;
+  --theme-error: #ef4444;
+  --theme-surface: #f8fafc;
+  --theme-text: #0f172a;
+  --theme-text-secondary: #64748b;
+  --theme-border: #e2e8f0;
+
+  /* Smooth transitions for theme changes */
+  * {
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -76,6 +99,18 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Theme system variables (light mode) */
+  --theme-primary: #0ea5e9;
+  --theme-secondary: #0284c7;
+  --theme-accent: #0369a1;
+  --theme-success: #10b981;
+  --theme-warning: #f59e0b;
+  --theme-error: #ef4444;
+  --theme-surface: #f8fafc;
+  --theme-text: #0f172a;
+  --theme-text-secondary: #64748b;
+  --theme-border: #e2e8f0;
 }
 
 .dark {
@@ -102,14 +137,18 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+
+  /* Theme system variables for dark mode */
+  --theme-primary: #3b82f6;
+  --theme-secondary: #1d4ed8;
+  --theme-accent: #1e40af;
+  --theme-success: #10b981;
+  --theme-warning: #f59e0b;
+  --theme-error: #ef4444;
+  --theme-surface: #1e293b;
+  --theme-text: #f1f5f9;
+  --theme-text-secondary: #94a3b8;
+  --theme-border: #374151;
 }
 
 @layer base {
