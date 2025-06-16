@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { theme } from '@/lib/theme';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getApplications } from '@/actions/applications';
@@ -24,16 +25,30 @@ export default async function ApplicationsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      {/* Header section with blue accent background */}
+      <div
+        className="p-6 rounded-lg flex justify-between items-center"
+        style={{
+          background: `linear-gradient(135deg, ${theme.primary}08 0%, ${theme.accent}08 100%)`,
+          border: `1px solid ${theme.accent}20`,
+        }}
+      >
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h2
+            className="text-3xl font-bold tracking-tight"
+            style={{ color: theme.primary }}
+          >
             Job Applications
           </h2>
-          <p className="text-muted-foreground">
+          <p style={{ color: theme.secondary }}>
             Track and manage all your job applications
           </p>
         </div>
-        <Button asChild>
+        <Button
+          asChild
+          className="text-white hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: theme.primary }}
+        >
           <Link href="/dashboard/applications/new" prefetch={true}>
             Add Application
           </Link>
@@ -41,16 +56,28 @@ export default async function ApplicationsPage() {
       </div>
 
       {applications.length === 0 ? (
-        <Card>
+        <Card
+          style={{
+            backgroundColor: 'white',
+            border: `1px solid ${theme.accent}30`,
+            borderTop: `4px solid ${theme.primary}`,
+          }}
+        >
           <CardHeader>
-            <CardTitle>No Applications Yet</CardTitle>
-            <CardDescription>
+            <CardTitle style={{ color: theme.primary }}>
+              No Applications Yet
+            </CardTitle>
+            <CardDescription style={{ color: theme.secondary }}>
               You haven&apos;t added any job applications yet. Get started by
               adding your first application.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button
+              asChild
+              className="text-white hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: theme.primary }}
+            >
               <Link href="/dashboard/applications/new" prefetch={true}>
                 Add Your First Application
               </Link>
