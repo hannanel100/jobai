@@ -207,7 +207,7 @@ export default async function Home() {
               style={{ color: theme.secondary }}
             >
               Powerful tools and insights designed to give you a competitive
-              edge in today's job market.
+              edge in today&apos;s job market.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -312,8 +312,8 @@ export default async function Home() {
             Ready to Transform Your Job Search?
           </h2>
           <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-            Join thousands of successful job seekers who've accelerated their
-            careers with JobTracker AI.
+            Join thousands of successful job seekers who&apos;ve accelerated
+            their careers with JobTracker AI.
           </p>
           <Button
             asChild
