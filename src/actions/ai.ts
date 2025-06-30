@@ -745,3 +745,326 @@ export async function getRateLimitStatus() {
     };
   }
 }
+
+/**
+ * Get comprehensive AI analytics and insights for the dashboard
+ */
+export async function getAIAnalytics() {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const userId = session.user.id;
+
+    // Calculate date ranges
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date(today);
+    monthAgo.setDate(monthAgo.setMonth(monthAgo.getMonth() - 1));
+
+    // Fetch all analyses with application data for correlation
+    const [analyses, applications] = await Promise.all([
+      db.resumeAnalysis.findMany({
+        where: { userId },
+        include: {
+          resume: {
+            select: { id: true, title: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      db.application.findMany({
+        where: { userId },
+        select: {
+          id: true,
+          status: true,
+          createdAt: true,
+          positionTitle: true,
+          companyName: true,
+        },
+      }),
+    ]);
+
+    // Basic analytics
+    const totalAnalyses = analyses.length;
+    const todayAnalyses = analyses.filter(
+      a => new Date(a.createdAt) >= today
+    ).length;
+    const weekAnalyses = analyses.filter(
+      a => new Date(a.createdAt) >= weekAgo
+    ).length;
+    const monthAnalyses = analyses.filter(
+      a => new Date(a.createdAt) >= monthAgo
+    ).length;
+
+    // Score analytics (only for scored analyses)
+    const scoredAnalyses = analyses.filter(
+      a => a.score !== null && a.score !== undefined
+    );
+    const averageScore =
+      scoredAnalyses.length > 0
+        ? Math.round(
+            scoredAnalyses.reduce((sum, a) => sum + (a.score || 0), 0) /
+              scoredAnalyses.length
+          )
+        : 0;
+    const topScore =
+      scoredAnalyses.length > 0
+        ? Math.max(...scoredAnalyses.map(a => a.score || 0))
+        : 0;
+
+    // Weekly trend data (last 7 days)
+    const weeklyTrend = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+
+      const dayAnalyses = analyses.filter(a => {
+        const analysisDate = new Date(a.createdAt);
+        return analysisDate >= date && analysisDate < nextDate;
+      });
+
+      weeklyTrend.push({
+        date: date.toISOString().split('T')[0], // YYYY-MM-DD format
+        analyses: dayAnalyses.length,
+        avgScore:
+          dayAnalyses.filter(a => a.score).length > 0
+            ? Math.round(
+                dayAnalyses
+                  .filter(a => a.score)
+                  .reduce((sum, a) => sum + (a.score || 0), 0) /
+                  dayAnalyses.filter(a => a.score).length
+              )
+            : 0,
+      });
+    }
+
+    // Analysis type distribution
+    const typeDistribution = analyses.reduce(
+      (acc, analysis) => {
+        const type = analysis.type;
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    // Score improvement tracking (comparing recent vs older analyses)
+    const recentAnalyses = scoredAnalyses.filter(
+      a => new Date(a.createdAt) >= weekAgo
+    );
+    const olderAnalyses = scoredAnalyses.filter(
+      a => new Date(a.createdAt) < weekAgo
+    );
+
+    const recentAvgScore =
+      recentAnalyses.length > 0
+        ? Math.round(
+            recentAnalyses.reduce((sum, a) => sum + (a.score || 0), 0) /
+              recentAnalyses.length
+          )
+        : 0;
+    const olderAvgScore =
+      olderAnalyses.length > 0
+        ? Math.round(
+            olderAnalyses.reduce((sum, a) => sum + (a.score || 0), 0) /
+              olderAnalyses.length
+          )
+        : 0;
+
+    const scoreImprovement = recentAvgScore - olderAvgScore;
+
+    // Application success correlation
+    const successfulApplications = applications.filter(
+      a => a.status === 'OFFER_RECEIVED'
+    ).length;
+    const totalApplications = applications.length;
+    const successRate =
+      totalApplications > 0
+        ? Math.round((successfulApplications / totalApplications) * 100)
+        : 0;
+
+    // AI usage patterns
+    const analysisFrequency = {
+      daily: todayAnalyses,
+      weekly: weekAnalyses,
+      monthly: monthAnalyses,
+    };
+
+    // Recent high-performing analyses
+    const topPerformingAnalyses = scoredAnalyses
+      .filter(a => a.score && a.score >= 80)
+      .slice(0, 5)
+      .map(a => ({
+        id: a.id,
+        resumeId: a.resumeId,
+        resumeTitle: a.resume?.title || 'Untitled Resume',
+        type: a.type as string,
+        score: a.score as number,
+        createdAt: a.createdAt,
+      }));
+
+    return {
+      success: true,
+      analytics: {
+        overview: {
+          totalAnalyses,
+          averageScore,
+          topScore,
+          scoreImprovement,
+          successRate,
+        },
+        usage: {
+          today: todayAnalyses,
+          week: weekAnalyses,
+          month: monthAnalyses,
+          frequency: analysisFrequency,
+        },
+        trends: {
+          weekly: weeklyTrend,
+          typeDistribution,
+        },
+        performance: {
+          topPerformingAnalyses,
+          recentAvgScore,
+          olderAvgScore,
+        },
+        correlations: {
+          totalApplications,
+          successfulApplications,
+          successRate,
+        },
+      },
+    };
+  } catch (error) {
+    console.error('Failed to get AI analytics:', error);
+    return {
+      success: false,
+      error: 'Failed to get AI analytics',
+    };
+  }
+}
+
+/**
+ * Get AI recommendation effectiveness tracking
+ */
+export async function getAIRecommendationEffectiveness() {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const userId = session.user.id;
+
+    // Get analyses with suggestions
+    const analysesWithSuggestions = await db.resumeAnalysis.findMany({
+      where: {
+        userId,
+        suggestions: {
+          not: undefined,
+        },
+      },
+      include: {
+        resume: {
+          select: { id: true, title: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Calculate suggestion effectiveness metrics
+    const totalSuggestions = analysesWithSuggestions.reduce(
+      (total, analysis) => {
+        const suggestions = analysis.suggestions as Array<{
+          category?: string;
+          priority?: string;
+          title?: string;
+          description?: string;
+        }>;
+        return total + (suggestions?.length || 0);
+      },
+      0
+    );
+
+    // Categorize suggestions by type and priority
+    const suggestionsByCategory: Record<string, number> = {};
+    const suggestionsByPriority = { high: 0, medium: 0, low: 0 };
+
+    analysesWithSuggestions.forEach(analysis => {
+      const suggestions = analysis.suggestions as Array<{
+        category?: string;
+        priority?: string;
+        title?: string;
+        description?: string;
+      }>;
+      if (suggestions) {
+        suggestions.forEach(suggestion => {
+          // Count by category
+          const category = suggestion.category || 'general';
+          suggestionsByCategory[category] =
+            (suggestionsByCategory[category] || 0) + 1;
+
+          // Count by priority
+          const priority = suggestion.priority || 'medium';
+          if (priority in suggestionsByPriority) {
+            suggestionsByPriority[
+              priority as keyof typeof suggestionsByPriority
+            ]++;
+          }
+        });
+      }
+    });
+
+    // Recent suggestions with high impact potential
+    const recentHighImpactSuggestions = analysesWithSuggestions
+      .slice(0, 10)
+      .flatMap(analysis => {
+        const suggestions = analysis.suggestions as Array<{
+          category?: string;
+          priority?: string;
+          title?: string;
+          description?: string;
+        }>;
+        return (suggestions || [])
+          .filter(s => s.priority === 'high')
+          .map(s => ({
+            category: s.category || 'general',
+            priority: s.priority || 'high',
+            title: s.title || 'Untitled Suggestion',
+            description: s.description || 'No description available',
+            analysisId: analysis.id,
+            resumeTitle: analysis.resume?.title || 'Untitled Resume',
+            createdAt: analysis.createdAt,
+          }));
+      })
+      .slice(0, 5);
+
+    return {
+      success: true,
+      effectiveness: {
+        totalSuggestions,
+        suggestionsByCategory,
+        suggestionsByPriority,
+        recentHighImpactSuggestions,
+        analysesWithSuggestions: analysesWithSuggestions.length,
+      },
+    };
+  } catch (error) {
+    console.error('Failed to get AI recommendation effectiveness:', error);
+    return {
+      success: false,
+      error: 'Failed to get recommendation effectiveness data',
+    };
+  }
+}

@@ -1,7 +1,12 @@
 import { auth } from '@/auth';
 import { logout } from '@/actions/auth';
 import { getApplications } from '@/actions/applications';
-import { getUserAnalyses, getRateLimitStatus } from '@/actions/ai';
+import {
+  getUserAnalyses,
+  getRateLimitStatus,
+  getAIAnalytics,
+  getAIRecommendationEffectiveness,
+} from '@/actions/ai';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -24,17 +29,28 @@ export default async function DashboardPage() {
   }
 
   // Fetch all data in parallel for better performance
-  const [applicationsResult, analysesResult, rateLimitResult] =
-    await Promise.all([
-      getApplications(),
-      getUserAnalyses(),
-      getRateLimitStatus(),
-    ]);
+  const [
+    applicationsResult,
+    analysesResult,
+    rateLimitResult,
+    analyticsResult,
+    recommendationEffectivenessResult,
+  ] = await Promise.all([
+    getApplications(),
+    getUserAnalyses(),
+    getRateLimitStatus(),
+    getAIAnalytics(),
+    getAIRecommendationEffectiveness(),
+  ]);
 
   const applications = applicationsResult.success
     ? applicationsResult.applications
     : [];
   const analyses = analysesResult.success ? analysesResult.analyses : [];
+  const analytics = analyticsResult.success ? analyticsResult.analytics : null;
+  const recommendationEffectiveness = recommendationEffectivenessResult.success
+    ? recommendationEffectivenessResult.effectiveness
+    : null;
   // Rate limit data for AI insights component
   // const rateLimit = rateLimitResult;
   // Calculate statistics
@@ -370,6 +386,8 @@ export default async function DashboardPage() {
       {/* AI Insights Section */}
       <ServerAIInsightsDashboard
         analyses={analyses || []}
+        analytics={analytics}
+        recommendationEffectiveness={recommendationEffectiveness}
         rateLimit={
           rateLimitResult.success && rateLimitResult.rateLimit
             ? rateLimitResult.rateLimit
