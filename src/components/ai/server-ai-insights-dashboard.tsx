@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -7,7 +9,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-// Removed theme import - using CSS variables instead
 import {
   Brain,
   Star,
@@ -18,9 +19,23 @@ import {
   AlertTriangle,
   Target,
   TrendingUp,
+  PieChart,
+  BarChart,
 } from 'lucide-react';
 import { ResumeAnalysis, AnalysisType } from '@prisma/client';
 import Link from 'next/link';
+import {
+  ResponsiveContainer,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  Tooltip as RechartsTooltip,
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from 'recharts';
 
 interface AnalysisWithData extends ResumeAnalysis {
   resume?: {
@@ -43,6 +58,19 @@ export function ServerAIInsightsDashboard({
   analyses,
   rateLimit,
 }: ServerAIInsightsDashboardProps) {
+  const getAnalysisTitle = (type: AnalysisType) => {
+    switch (type) {
+      case 'COMPREHENSIVE_SCORE':
+        return 'Resume Score';
+      case 'JOB_MATCH':
+        return 'Job Match';
+      case 'OPTIMIZATION':
+        return 'Optimization';
+      default:
+        return 'Analysis';
+    }
+  };
+
   // Calculate stats from server-side data
   const scoredAnalyses = analyses.filter(
     a => a.score !== null && a.score !== undefined
@@ -70,6 +98,30 @@ export function ServerAIInsightsDashboard({
     analysesToday,
   };
 
+  const analysisTypeDistribution = analyses.reduce(
+    (acc, analysis) => {
+      const type = getAnalysisTitle(analysis.type);
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
+  const pieChartData = Object.entries(analysisTypeDistribution).map(
+    ([name, value]) => ({ name, value })
+  );
+
+  const recentScoresData = scoredAnalyses
+    .slice(0, 5)
+    .map(a => ({
+      name: a.resume?.title || 'Resume',
+      score: a.score,
+      date: new Date(a.createdAt).toLocaleDateString(),
+    }))
+    .reverse();
+
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658'];
+
   const getAnalysisIcon = (type: AnalysisType) => {
     switch (type) {
       case 'COMPREHENSIVE_SCORE':
@@ -80,19 +132,6 @@ export function ServerAIInsightsDashboard({
         return <TrendingUp className="h-4 w-4 text-green-500" />;
       default:
         return <Brain className="h-4 w-4 text-purple-500" />;
-    }
-  };
-
-  const getAnalysisTitle = (type: AnalysisType) => {
-    switch (type) {
-      case 'COMPREHENSIVE_SCORE':
-        return 'Resume Score';
-      case 'JOB_MATCH':
-        return 'Job Match';
-      case 'OPTIMIZATION':
-        return 'Optimization';
-      default:
-        return 'Analysis';
     }
   };
 
@@ -225,6 +264,71 @@ export function ServerAIInsightsDashboard({
             )}
           </CardContent>
         </Card>
+      )}
+
+      {analyses.length > 0 && (
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <PieChart className="h-5 w-5 text-blue-500" />
+                Analysis Type Distribution
+              </CardTitle>
+              <CardDescription>
+                Breakdown of AI analysis types used
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <RechartsPieChart>
+                  <Pie
+                    data={pieChartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                  >
+                    {pieChartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart className="h-5 w-5 text-green-500" />
+                Recent Resume Scores
+              </CardTitle>
+              <CardDescription>
+                Scores from the last 5 resume analyses
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <RechartsBarChart data={recentScoresData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <RechartsTooltip />
+                  <Bar dataKey="score" fill="#82ca9d" />
+                </RechartsBarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Recent Analyses or Empty State */}
