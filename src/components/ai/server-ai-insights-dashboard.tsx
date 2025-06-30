@@ -13,7 +13,6 @@ import {
   Brain,
   Star,
   FileText,
-  Clock,
   Zap,
   ChevronRight,
   AlertTriangle,
@@ -44,8 +43,75 @@ interface AnalysisWithData extends ResumeAnalysis {
   };
 }
 
+interface AIAnalytics {
+  overview: {
+    totalAnalyses: number;
+    averageScore: number;
+    topScore: number;
+    scoreImprovement: number;
+    successRate: number;
+  };
+  usage: {
+    today: number;
+    week: number;
+    month: number;
+    frequency: {
+      daily: number;
+      weekly: number;
+      monthly: number;
+    };
+  };
+  trends: {
+    weekly: Array<{
+      date: string;
+      analyses: number;
+      avgScore: number;
+    }>;
+    typeDistribution: Record<string, number>;
+  };
+  performance: {
+    topPerformingAnalyses: Array<{
+      id: string;
+      resumeId: string;
+      resumeTitle: string;
+      type: string;
+      score: number;
+      createdAt: Date;
+    }>;
+    recentAvgScore: number;
+    olderAvgScore: number;
+  };
+  correlations: {
+    totalApplications: number;
+    successfulApplications: number;
+    successRate: number;
+  };
+}
+
+interface RecommendationEffectiveness {
+  totalSuggestions: number;
+  suggestionsByCategory: Record<string, number>;
+  suggestionsByPriority: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  recentHighImpactSuggestions: Array<{
+    category: string;
+    priority: string;
+    title: string;
+    description: string;
+    analysisId: string;
+    resumeTitle: string;
+    createdAt: Date;
+  }>;
+  analysesWithSuggestions: number;
+}
+
 interface ServerAIInsightsDashboardProps {
   analyses: AnalysisWithData[];
+  analytics?: AIAnalytics | null;
+  recommendationEffectiveness?: RecommendationEffectiveness | null;
   rateLimit: {
     count: number;
     limit: number;
@@ -56,6 +122,8 @@ interface ServerAIInsightsDashboardProps {
 
 export function ServerAIInsightsDashboard({
   analyses,
+  analytics,
+  recommendationEffectiveness,
   rateLimit,
 }: ServerAIInsightsDashboardProps) {
   const getAnalysisTitle = (type: AnalysisType) => {
@@ -71,7 +139,7 @@ export function ServerAIInsightsDashboard({
     }
   };
 
-  // Calculate stats from server-side data
+  // Calculate stats from server-side data (fallback if analytics not available)
   const scoredAnalyses = analyses.filter(
     a => a.score !== null && a.score !== undefined
   );
@@ -107,10 +175,6 @@ export function ServerAIInsightsDashboard({
     {} as Record<string, number>
   );
 
-  const pieChartData = Object.entries(analysisTypeDistribution).map(
-    ([name, value]) => ({ name, value })
-  );
-
   const recentScoresData = scoredAnalyses
     .slice(0, 5)
     .map(a => ({
@@ -120,7 +184,7 @@ export function ServerAIInsightsDashboard({
     }))
     .reverse();
 
-  const COLORS = ['#8884d8', '#82ca9d', '#ffc658'];
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1'];
 
   const getAnalysisIcon = (type: AnalysisType) => {
     switch (type) {
@@ -157,7 +221,7 @@ export function ServerAIInsightsDashboard({
 
   return (
     <div className="space-y-6">
-      {/* AI Stats Overview */}
+      {/* Enhanced AI Stats Overview with Analytics */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
@@ -166,7 +230,15 @@ export function ServerAIInsightsDashboard({
                 <p className="text-sm font-medium text-gray-600">
                   Total Analyses
                 </p>
-                <p className="text-2xl font-bold">{stats.totalAnalyses}</p>
+                <p className="text-2xl font-bold">
+                  {analytics?.overview.totalAnalyses || stats.totalAnalyses}
+                </p>
+                {analytics && (
+                  <p className="text-xs text-gray-500">
+                    {analytics.usage.today} today • {analytics.usage.week} this
+                    week
+                  </p>
+                )}
               </div>
               <Brain className="h-8 w-8 text-purple-500" />
             </div>
@@ -180,10 +252,18 @@ export function ServerAIInsightsDashboard({
                   Average Score
                 </p>
                 <p
-                  className={`text-2xl font-bold ${getScoreColor(stats.averageScore)}`}
+                  className={`text-2xl font-bold ${getScoreColor(analytics?.overview.averageScore || stats.averageScore)}`}
                 >
-                  {stats.averageScore}/100
+                  {analytics?.overview.averageScore || stats.averageScore}/100
                 </p>
+                {analytics && analytics.overview.scoreImprovement !== 0 && (
+                  <p
+                    className={`text-xs ${analytics.overview.scoreImprovement > 0 ? 'text-green-600' : 'text-red-600'}`}
+                  >
+                    {analytics.overview.scoreImprovement > 0 ? '+' : ''}
+                    {analytics.overview.scoreImprovement} from last period
+                  </p>
+                )}
               </div>
               <Star className="h-8 w-8 text-yellow-500" />
             </div>
@@ -195,10 +275,16 @@ export function ServerAIInsightsDashboard({
               <div>
                 <p className="text-sm font-medium text-gray-600">Top Score</p>
                 <p
-                  className={`text-2xl font-bold ${getScoreColor(stats.topScore)}`}
+                  className={`text-2xl font-bold ${getScoreColor(analytics?.overview.topScore || stats.topScore)}`}
                 >
-                  {stats.topScore}/100
+                  {analytics?.overview.topScore || stats.topScore}/100
                 </p>
+                {analytics && (
+                  <p className="text-xs text-gray-500">
+                    {analytics.performance.topPerformingAnalyses.length}{' '}
+                    high-performing
+                  </p>
+                )}
               </div>
               <Target className="h-8 w-8 text-blue-500" />
             </div>
@@ -208,14 +294,171 @@ export function ServerAIInsightsDashboard({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Today</p>
-                <p className="text-2xl font-bold">{stats.analysesToday}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Success Rate
+                </p>
+                <p className="text-2xl font-bold text-green-600">
+                  {analytics?.correlations.successRate || 0}%
+                </p>
+                {analytics && (
+                  <p className="text-xs text-gray-500">
+                    {analytics.correlations.successfulApplications} of{' '}
+                    {analytics.correlations.totalApplications} apps
+                  </p>
+                )}
               </div>
-              <Clock className="h-8 w-8 text-green-500" />
+              <TrendingUp className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* AI Usage Trends */}
+      {analytics && analytics.trends.weekly.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart className="h-5 w-5 text-blue-500" />
+              AI Usage Trends (Last 7 Days)
+            </CardTitle>
+            <CardDescription>
+              Daily analysis activity and average scores
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={200}>
+              <RechartsBarChart data={analytics.trends.weekly}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={value =>
+                    new Date(value).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })
+                  }
+                />
+                <YAxis />
+                <RechartsTooltip
+                  labelFormatter={value => new Date(value).toLocaleDateString()}
+                  formatter={(value, name) => [
+                    name === 'analyses'
+                      ? `${value} analyses`
+                      : `${value}% avg score`,
+                    name === 'analyses' ? 'Analyses' : 'Avg Score',
+                  ]}
+                />
+                <Bar dataKey="analyses" fill="#8884d8" name="analyses" />
+                <Bar dataKey="avgScore" fill="#82ca9d" name="avgScore" />
+              </RechartsBarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* AI Recommendation Effectiveness */}
+      {recommendationEffectiveness && (
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-green-500" />
+                Recommendation Impact
+              </CardTitle>
+              <CardDescription>
+                AI suggestion effectiveness and priority distribution
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 grid-cols-3">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-red-500">
+                    {recommendationEffectiveness.suggestionsByPriority.high}
+                  </p>
+                  <p className="text-xs text-gray-600">High Priority</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-yellow-500">
+                    {recommendationEffectiveness.suggestionsByPriority.medium}
+                  </p>
+                  <p className="text-xs text-gray-600">Medium Priority</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-500">
+                    {recommendationEffectiveness.suggestionsByPriority.low}
+                  </p>
+                  <p className="text-xs text-gray-600">Low Priority</p>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t">
+                <p className="text-sm text-gray-600 mb-2">
+                  Recent High-Impact Suggestions:
+                </p>
+                <div className="space-y-2">
+                  {recommendationEffectiveness.recentHighImpactSuggestions
+                    .slice(0, 3)
+                    .map((suggestion, index) => (
+                      <div
+                        key={index}
+                        className="text-xs bg-red-50 p-2 rounded"
+                      >
+                        <p className="font-medium text-red-800">
+                          {suggestion.title}
+                        </p>
+                        <p className="text-red-600 truncate">
+                          {suggestion.description}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <PieChart className="h-5 w-5 text-purple-500" />
+                Suggestion Categories
+              </CardTitle>
+              <CardDescription>
+                Breakdown of AI suggestions by category
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <RechartsPieChart>
+                  <Pie
+                    data={Object.entries(
+                      recommendationEffectiveness.suggestionsByCategory
+                    ).map(([name, value]) => ({ name, value }))}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                  >
+                    {Object.entries(
+                      recommendationEffectiveness.suggestionsByCategory
+                    ).map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Rate Limit Status */}
       {rateLimit && (
@@ -271,61 +514,76 @@ export function ServerAIInsightsDashboard({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <PieChart className="h-5 w-5 text-blue-500" />
-                Analysis Type Distribution
+                <TrendingUp className="h-5 w-5 text-green-500" />
+                Score Performance Trends
               </CardTitle>
               <CardDescription>
-                Breakdown of AI analysis types used
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <RechartsPieChart>
-                  <Pie
-                    data={pieChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    nameKey="name"
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                  >
-                    {pieChartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart className="h-5 w-5 text-green-500" />
-                Recent Resume Scores
-              </CardTitle>
-              <CardDescription>
-                Scores from the last 5 resume analyses
+                Resume score improvements over recent analyses
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
                 <RechartsBarChart data={recentScoresData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <RechartsTooltip />
-                  <Bar dataKey="score" fill="#82ca9d" />
+                  <XAxis dataKey="name" />
+                  <YAxis domain={[0, 100]} />
+                  <RechartsTooltip
+                    formatter={value => [`${value}/100`, 'Score']}
+                    labelFormatter={label => `Resume: ${label}`}
+                  />
+                  <Bar dataKey="score" fill="#10b981" />
                 </RechartsBarChart>
               </ResponsiveContainer>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart className="h-5 w-5 text-blue-500" />
+                Analysis Summary & Insights
+              </CardTitle>
+              <CardDescription>
+                Performance metrics from recent resume analyses
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <p className="text-2xl font-bold text-blue-600">
+                      {stats.totalAnalyses}
+                    </p>
+                    <p className="text-xs text-gray-600">Total Analyses</p>
+                  </div>
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">
+                      {stats.averageScore}/100
+                    </p>
+                    <p className="text-xs text-gray-600">Average Score</p>
+                  </div>
+                </div>
+                {analytics && (
+                  <div className="pt-2 border-t">
+                    <p className="text-sm text-gray-600 mb-2">
+                      Analysis Types:
+                    </p>
+                    <div className="space-y-1">
+                      {Object.entries(
+                        analytics.trends.typeDistribution ||
+                          analysisTypeDistribution
+                      ).map(([type, count]) => (
+                        <div
+                          key={type}
+                          className="flex justify-between text-sm"
+                        >
+                          <span className="text-gray-700">{type}</span>
+                          <span className="font-medium">{count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -406,6 +664,7 @@ export function ServerAIInsightsDashboard({
                 >
                   <Link href="/dashboard/resumes">
                     <FileText className="h-4 w-4 mr-2" />
+                    Upload Resume
                   </Link>
                 </Button>
                 <Button
